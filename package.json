@@ -13,11 +13,19 @@
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3",
+    "prettier": "^3.8.4",
     "turbo": "^2.4.0"
   },
   "lint-staged": {
     "apps/client/src/**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
       "pnpm --filter client exec eslint --fix"
+    ],
+    "apps/backend/src/**/*.ts": [
+      "prettier --write"
+    ],
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
     ]
   },
   "pnpm": {

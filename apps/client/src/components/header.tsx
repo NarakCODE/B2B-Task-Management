@@ -25,6 +25,7 @@ import { useAuthContext } from "@/context/auth-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper"
 import { ChevronsUpDownIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react"
+import NotificationCenter from "@/components/notification-center"
 
 const Header = () => {
   const location = useLocation()
@@ -62,9 +63,7 @@ const Header = () => {
                   <Link to={`/workspace/${workspaceId}`}>Dashboard</Link>
                 </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage className="line-clamp-1 ">
-                  Dashboard
-                </BreadcrumbPage>
+                <BreadcrumbPage className="line-clamp-1 ">Dashboard</BreadcrumbPage>
               )}
             </BreadcrumbItem>
 
@@ -72,9 +71,7 @@ const Header = () => {
               <>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem className="text-[15px]">
-                  <BreadcrumbPage className="line-clamp-1">
-                    {pageHeading}
-                  </BreadcrumbPage>
+                  <BreadcrumbPage className="line-clamp-1">{pageHeading}</BreadcrumbPage>
                 </BreadcrumbItem>
               </>
             )}
@@ -82,18 +79,13 @@ const Header = () => {
         </Breadcrumb>
       </div>
       <div className="flex items-center gap-2 px-3">
+        <NotificationCenter />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-full h-8 gap-1.5 pr-2.5 pl-1"
-            >
+            <Button variant="outline" size="sm" className="rounded-full h-8 gap-1.5 pr-2.5 pl-1">
               <Avatar className="border-background size-6 border">
                 <AvatarImage src={user?.profilePicture || ""} alt={name} />
-                <AvatarFallback className={`${avatarColor} text-[10px]`}>
-                  {initials}
-                </AvatarFallback>
+                <AvatarFallback className={`${avatarColor} text-[10px]`}>{initials}</AvatarFallback>
               </Avatar>
               <span className="text-xs font-medium hidden sm:inline">{name}</span>
               <ChevronsUpDownIcon className="size-3.5 opacity-60" aria-hidden="true" />
