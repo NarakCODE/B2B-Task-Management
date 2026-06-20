@@ -15,13 +15,13 @@ function getMessageText(message: any): string {
 const mockModel = new MockLanguageModelV4({
   provider: "mock-provider",
   modelId: "mock-model",
-  doGenerate: async (options) => {
+  doGenerate: (async (options) => {
     const lastMessage = options.prompt[options.prompt.length - 1];
     const isToolResult = lastMessage?.role === "tool" || (Array.isArray(lastMessage?.content) && lastMessage.content.some((c) => c.type === "tool-result"));
 
     if (isToolResult) {
       return {
-        content: [{ type: "text", text: "Database query executed successfully." }],
+        text: "Database query executed successfully.",
         finishReason: { unified: "stop", raw: undefined },
         usage: {
           inputTokens: { total: 10, noCache: 10 },
@@ -49,12 +49,12 @@ const mockModel = new MockLanguageModelV4({
       }
 
       return {
-        content: [
+        text: "",
+        toolCalls: [
           {
-            type: "tool-call",
             toolCallId: "call-1",
             toolName,
-            input: inputStr,
+            args: inputStr,
           },
         ],
         finishReason: { unified: "tool-calls", raw: undefined },
@@ -65,11 +65,8 @@ const mockModel = new MockLanguageModelV4({
         warnings: [],
       };
     }
-  },
-  doStream: async (options) => {
-    const lastMessage = options.prompt[options.prompt.length - 1];
-    const isToolResult = lastMessage?.role === "tool" || (Array.isArray(lastMessage?.content) && lastMessage.content.some((c) => c.type === "tool-result"));
-
+  }) as any,
+  doStream: (async (options) => {
     let chunks: any[] = [];
     if (isToolResult) {
       let toolName = "";
@@ -80,11 +77,12 @@ const mockModel = new MockLanguageModelV4({
         const contents = Array.isArray(msg.content) ? msg.content : [];
         const resultPart = contents.find(c => c.type === "tool-result");
         if (resultPart) {
-          toolName = resultPart.toolName;
+          const rp = resultPart as { toolName: string; result: unknown };
+          toolName = rp.toolName;
           try {
-            resultData = typeof resultPart.result === "string" ? JSON.parse(resultPart.result) : resultPart.result;
+            resultData = typeof rp.result === "string" ? JSON.parse(rp.result) : rp.result;
           } catch {
-            resultData = resultPart.result;
+            resultData = rp.result;
           }
           break;
         }
@@ -174,7 +172,7 @@ const mockModel = new MockLanguageModelV4({
         },
       }),
     };
-  },
+  }) as any,
 });
 
 export default defineAgent({

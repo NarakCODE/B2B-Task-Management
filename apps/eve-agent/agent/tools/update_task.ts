@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { connectDb } from "../lib/db";
-import { TaskModel } from "../lib/models";
+import { connectDb } from "../lib/db.js";
+import { TaskModel } from "../lib/models.js";
 
 export default defineTool({
   description: "Update task properties (status, priority, type, assignee) in the database.",

@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { connectDb } from "../lib/db";
-import { WorkspaceModel } from "../lib/models";
+import { connectDb } from "../lib/db.js";
+import { WorkspaceModel } from "../lib/models.js";
 
 export default defineTool({
   description: "Get all active workspaces in the B2B Scrum system.",

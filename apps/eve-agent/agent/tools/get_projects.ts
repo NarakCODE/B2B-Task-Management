@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { connectDb } from "../lib/db";
-import { ProjectModel } from "../lib/models";
+import { connectDb } from "../lib/db.js";
+import { ProjectModel } from "../lib/models.js";
 
 export default defineTool({
   description: "Get all projects in a specific workspace.",
