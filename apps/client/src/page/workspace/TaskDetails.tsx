@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import {
   ArrowLeft,
@@ -9,18 +10,19 @@ import {
   ArrowRight,
   Loader,
   History,
+  Pencil,
 } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/reui/badge"
+import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import PageContainer from "@/components/resuable/page-container"
 import useWorkspaceId from "@/hooks/use-workspace-id"
 import useGetTaskByIdQuery from "@/hooks/api/use-get-task-by-id"
 import { useGetTaskCommentsQuery } from "@/hooks/api/use-get-comments"
-import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper"
+import { getAvatarFallbackText } from "@/lib/helper"
 import RichContentViewer from "@/components/editor/rich-content-viewer"
 import TaskCommentBox from "@/components/workspace/task/task-comment-box"
 import TaskCommentList from "@/components/workspace/task/task-comment-list"
@@ -30,25 +32,27 @@ import TaskTimeline from "@/components/workspace/task/task-timeline"
 import TaskTimeTracking from "@/components/workspace/task/task-time-tracking"
 import TaskAttachments from "@/components/workspace/task/task-attachments"
 import TaskDependencies from "@/components/workspace/task/task-dependencies"
+import EditTaskDialog from "@/components/workspace/task/edit-task-dialog"
 
 const priorityStyles: Record<string, string> = {
-  HIGH: "destructive-light",
-  MEDIUM: "primary-light",
-  LOW: "warning-light",
+  HIGH: "destructive",
+  MEDIUM: "default",
+  LOW: "secondary",
 }
 
 const statusStyles: Record<string, string> = {
   BACKLOG: "outline",
   TODO: "default",
-  IN_PROGRESS: "primary-light",
-  IN_REVIEW: "warning-light",
-  DONE: "success-light",
+  IN_PROGRESS: "default",
+  IN_REVIEW: "secondary",
+  DONE: "outline",
 }
 
 export default function TaskDetails() {
   const { taskId, projectId } = useParams()
   const workspaceId = useWorkspaceId()
   const navigate = useNavigate()
+  const [isEditOpen, setIsEditOpen] = useState(false)
 
   const { data: taskData, isLoading } = useGetTaskByIdQuery({
     taskId: taskId || "",
@@ -68,7 +72,6 @@ export default function TaskDetails() {
 
   const assigneeName = task?.assignedTo?.name || "Unassigned"
   const assigneeInitials = getAvatarFallbackText(assigneeName)
-  const assigneeColor = getAvatarColor(assigneeName)
 
   const handleBack = () => {
     navigate(`/workspace/${workspaceId}/project/${projectId}`)
@@ -94,43 +97,58 @@ export default function TaskDetails() {
   }
 
   return (
-    <PageContainer className="py-4 md:py-6 space-y-6 max-w-4xl">
-      <button
+    <PageContainer className="py-4 md:py-6 flex flex-col gap-6 max-w-4xl">
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={handleBack}
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
+        className="w-fit -ml-2 text-muted-foreground"
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft data-icon="inline-start" className="size-4" />
         Back to {task.project?.name || "Project"}
-      </button>
+      </Button>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="font-mono text-xs">
+          <Badge variant="outline" className="font-mono">
             {task.taskCode}
           </Badge>
           <TaskTypeBadge type={task.taskType} />
           <Badge
-            variant={priorityStyles[task.priority] as "outline" | "default"}
+            variant={priorityStyles[task.priority] as "destructive" | "default" | "secondary"}
             className="capitalize"
           >
             {task.priority.toLowerCase()} Priority
           </Badge>
           <Badge
-            variant={statusStyles[task.status] as "outline" | "default"}
+            variant={statusStyles[task.status] as "outline" | "default" | "secondary"}
             className="capitalize"
           >
             {task.status.replace("_", " ").toLowerCase()}
           </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setIsEditOpen(true)}
+          >
+            <Pencil data-icon="inline-start" className="size-3.5" />
+            Edit
+          </Button>
         </div>
 
         <h1 className="text-2xl font-semibold tracking-tight">{task.title}</h1>
       </div>
 
+      <EditTaskDialog task={task} isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+        <div className="md:col-span-2 flex flex-col gap-6">
           <Card>
-            <CardContent className="pt-6">
-              <h2 className="text-sm font-semibold mb-3">Description</h2>
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold">Description</CardTitle>
+            </CardHeader>
+            <CardContent>
               {task.description ? (
                 <RichContentViewer content={task.description} className="text-sm" />
               ) : (
@@ -158,29 +176,36 @@ export default function TaskDetails() {
           </Card>
 
           <Card>
-            <CardContent className="pt-6 space-y-4">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
-                Comments ({comments.length})
-              </h2>
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold">Comments ({comments.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
               <TaskCommentList comments={comments} workspaceId={workspaceId} />
               <TaskCommentBox workspaceId={workspaceId} taskId={task._id} />
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="pt-6 space-y-4">
-              <h2 className="text-sm font-semibold flex items-center gap-2">
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <History className="size-4" />
                 Activity Log
-              </h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <TaskTimeline taskId={task._id} workspaceId={workspaceId} />
             </CardContent>
           </Card>
         </div>
 
-        <div className="space-y-4 md:sticky md:top-6 md:self-start">
+        <div className="flex flex-col gap-4 md:sticky md:top-6 md:self-start">
           <Card>
-            <CardContent className="p-4 space-y-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3 pt-0">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground flex items-center gap-1.5">
                   <User className="size-3.5" />
@@ -189,7 +214,7 @@ export default function TaskDetails() {
                 <div className="flex items-center gap-2">
                   <Avatar className="size-6">
                     <AvatarImage src={task.assignedTo?.profilePicture ?? ""} />
-                    <AvatarFallback className={`text-[9px] ${assigneeColor}`}>
+                    <AvatarFallback className="text-[0.6rem] font-medium">
                       {assigneeInitials}
                     </AvatarFallback>
                   </Avatar>
@@ -271,7 +296,12 @@ export default function TaskDetails() {
           </Card>
 
           <Card>
-            <CardContent className="p-4 pt-5">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Time Tracking
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               <TaskTimeTracking
                 taskId={task._id}
                 workspaceId={workspaceId}

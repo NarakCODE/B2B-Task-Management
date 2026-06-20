@@ -4,6 +4,7 @@ import { Plus, Trash2, Loader } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Progress } from "@/components/ui/progress"
 import { toast } from "sonner"
 
 import { TaskType } from "@/types/api.type"
@@ -103,30 +104,25 @@ export default function TaskSubtasks({ task, workspaceId }: TaskSubtasksProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Header & Progress */}
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <div className="flex justify-between items-center text-sm font-semibold">
           <span>Subtasks</span>
           <span className="text-xs text-muted-foreground">
             {completedCount} / {totalCount} ({progressPercentage}%)
           </span>
         </div>
-        <div className="w-full h-1.5 bg-muted dark:bg-zinc-800 rounded-full overflow-hidden">
-          <div
-            style={{ width: `${progressPercentage}%` }}
-            className="h-full bg-emerald-500 transition-all duration-500 ease-out"
-          />
-        </div>
+        <Progress value={progressPercentage} className="h-1.5" />
       </div>
 
       {/* Subtask list */}
       {totalCount > 0 && (
-        <div className="space-y-1 max-h-[220px] overflow-y-auto pr-1">
+        <div className="flex flex-col gap-0.5 max-h-[220px] overflow-y-auto pr-1">
           {subtasks.map((sub) => (
             <div
               key={sub._id}
-              className="group flex items-center justify-between py-1.5 px-2 hover:bg-muted/40 dark:hover:bg-zinc-900/40 rounded-md transition-colors"
+              className="group flex items-center justify-between py-1.5 px-2 hover:bg-muted/40 rounded-md transition-colors"
             >
               <div className="flex items-center gap-2.5 flex-1 min-w-0">
                 <Checkbox
@@ -186,7 +182,7 @@ export default function TaskSubtasks({ task, workspaceId }: TaskSubtasksProps) {
           {isCreating ? (
             <Loader className="size-3.5 animate-spin" />
           ) : (
-            <Plus className="size-3.5 mr-1" />
+            <Plus data-icon="inline-start" className="size-3.5" />
           )}
           Add
         </Button>

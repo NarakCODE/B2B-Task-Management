@@ -1,9 +1,9 @@
-import { z } from "zod";
-import { format } from "date-fns";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { CalendarIcon, Loader } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { z } from "zod"
+import { format } from "date-fns"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { CalendarIcon, Loader } from "lucide-react"
+import { cn } from "@/lib/utils"
 import {
   Form,
   FormControl,
@@ -11,84 +11,69 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import RichTextEditor from "@/components/editor/rich-text-editor";
-import { Calendar } from "@/components/ui/calendar";
-import useWorkspaceId from "@/hooks/use-workspace-id";
-import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "@/constant";
-import { transformOptions } from "@/lib/helper";
-import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members";
-import { useGetProjectSprintsQuery } from "@/hooks/api/use-get-sprints";
-import { editTaskMutationFn } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { TaskType } from "@/types/api.type";
+} from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import RichTextEditor from "@/components/editor/rich-text-editor"
+import { Calendar } from "@/components/ui/calendar"
+import useWorkspaceId from "@/hooks/use-workspace-id"
+import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "@/constant"
+import { transformOptions } from "@/lib/helper"
+import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members"
+import { useGetProjectSprintsQuery } from "@/hooks/api/use-get-sprints"
+import { editTaskMutationFn } from "@/lib/api"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+import { TaskType } from "@/types/api.type"
 
-export default function EditTaskForm({
-  task,
-  onClose,
-}: {
-  task: TaskType;
-  onClose: () => void;
-}) {
-  const queryClient = useQueryClient();
-  const workspaceId = useWorkspaceId();
+export default function EditTaskForm({ task, onClose }: { task: TaskType; onClose: () => void }) {
+  const queryClient = useQueryClient()
+  const workspaceId = useWorkspaceId()
 
   const { mutate, isPending } = useMutation({
     mutationFn: editTaskMutationFn,
-  });
+  })
 
-  const { data: memberData } = useGetWorkspaceMembers(workspaceId);
-  const members = memberData?.members || [];
+  const { data: memberData } = useGetWorkspaceMembers(workspaceId)
+  const members = memberData?.members || []
 
-  const projectId = task.project?._id || "";
+  const projectId = task.project?._id || ""
   const { data: sprintsData } = useGetProjectSprintsQuery({
     workspaceId,
     projectId,
     enabled: !!projectId,
-  });
-  const sprints = sprintsData?.sprints || [];
+  })
+  const sprints = sprintsData?.sprints || []
 
   const membersOptions = members.map((member) => ({
     label: member.userId?.name || "Unknown",
     value: member.userId?._id || "",
-  }));
+  }))
 
-  const statusOptions = transformOptions(Object.values(TaskStatusEnum));
-  const priorityOptions = transformOptions(Object.values(TaskPriorityEnum));
+  const statusOptions = transformOptions(Object.values(TaskStatusEnum))
+  const priorityOptions = transformOptions(Object.values(TaskPriorityEnum))
 
   const formSchema = z.object({
     title: z.string().trim().min(1, { message: "Title is required" }),
     description: z.string().trim(),
-    status: z.enum(
-      Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum],
-    ),
-    priority: z.enum(
-      Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum],
-    ),
+    status: z.enum(Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum]),
+    priority: z.enum(Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum]),
     assignedTo: z.string().trim().min(1, { message: "AssignedTo is required" }),
     dueDate: z.date({ message: "A due date is required." }),
-    taskType: z.enum(
-      Object.values(TaskTypeEnum) as [keyof typeof TaskTypeEnum],
-      { message: "Task type is required" }
-    ),
+    taskType: z.enum(Object.values(TaskTypeEnum) as [keyof typeof TaskTypeEnum], {
+      message: "Task type is required",
+    }),
     storyPoints: z.number().int().min(0).nullable().optional(),
     sprint: z.string().nullable().optional(),
-  });
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,12 +88,12 @@ export default function EditTaskForm({
       storyPoints: task?.storyPoints ?? null,
       sprint: task?.sprint?._id ?? "backlog",
     },
-  });
+  })
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (isPending) return;
+    if (isPending) return
 
-    const sprintValue = values.sprint === "backlog" ? null : values.sprint;
+    const sprintValue = values.sprint === "backlog" ? null : values.sprint
 
     const payload = {
       workspaceId,
@@ -119,29 +104,25 @@ export default function EditTaskForm({
         sprint: sprintValue,
         dueDate: values.dueDate.toISOString(),
       },
-    };
+    }
 
     mutate(payload, {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["project-analytics", task.project?._id],
-        });
-        queryClient.invalidateQueries({ queryKey: ["all-tasks", workspaceId] });
-        toast.success("Task updated successfully");
-        onClose();
+        })
+        queryClient.invalidateQueries({ queryKey: ["all-tasks", workspaceId] })
+        toast.success("Task updated successfully")
+        onClose()
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(error.message)
       },
-    });
-  };
+    })
+  }
 
   return (
     <div>
-      <div className="mb-4 pb-2 border-b">
-        <h1 className="text-xl font-semibold">Edit Task</h1>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4 pr-1">
@@ -259,11 +240,7 @@ export default function EditTaskForm({
                       </FormControl>
                       <SelectContent>
                         {Object.values(TaskTypeEnum).map((type) => (
-                          <SelectItem
-                            className="!capitalize"
-                            key={type}
-                            value={type}
-                          >
+                          <SelectItem className="!capitalize" key={type} value={type}>
                             {type.toLowerCase()}
                           </SelectItem>
                         ))}
@@ -286,8 +263,8 @@ export default function EditTaskForm({
                         placeholder="e.g. 5, 8"
                         value={field.value === null || field.value === undefined ? "" : field.value}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          field.onChange(val === "" ? null : parseInt(val));
+                          const val = e.target.value
+                          field.onChange(val === "" ? null : parseInt(val))
                         }}
                       />
                     </FormControl>
@@ -342,12 +319,10 @@ export default function EditTaskForm({
                             variant="outline"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
-                            {field.value
-                              ? format(field.value, "PPP")
-                              : "Pick a date"}
+                            {field.value ? format(field.value, "PPP") : "Pick a date"}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -405,5 +380,5 @@ export default function EditTaskForm({
         </form>
       </Form>
     </div>
-  );
+  )
 }

@@ -15,7 +15,15 @@ import {
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
   getTaskAttachmentsQueryFn,
   uploadTaskAttachmentMutationFn,
@@ -35,11 +43,11 @@ function formatBytes(bytes: number) {
 
 function getFileIcon(mimeType: string) {
   if (mimeType.startsWith("image/")) return <FileImage className="size-5 text-blue-500" />
-  if (mimeType.includes("pdf")) return <FileText className="size-5 text-red-500" />
+  if (mimeType.includes("pdf")) return <FileText className="size-5 text-destructive" />
   if (mimeType.includes("spreadsheet") || mimeType.includes("excel"))
-    return <FileSpreadsheet className="size-5 text-green-500" />
+    return <FileSpreadsheet className="size-5 text-primary" />
   if (mimeType.includes("zip") || mimeType.includes("archive"))
-    return <FileArchive className="size-5 text-yellow-500" />
+    return <FileArchive className="size-5 text-muted-foreground" />
   return <FileText className="size-5 text-muted-foreground" />
 }
 
@@ -110,7 +118,7 @@ export default function TaskAttachments({ taskId, workspaceId }: Props) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold flex items-center gap-2">
           <Paperclip className="size-4" />
@@ -124,9 +132,9 @@ export default function TaskAttachments({ taskId, workspaceId }: Props) {
           onClick={() => fileInputRef.current?.click()}
         >
           {uploadMutation.isPending ? (
-            <Loader className="size-3.5 animate-spin" />
+            <Loader data-icon="inline-start" className="size-3.5 animate-spin" />
           ) : (
-            <Upload className="size-3.5" />
+            <Upload data-icon="inline-start" className="size-3.5" />
           )}
           {uploadMutation.isPending ? "Uploading…" : "Upload"}
         </Button>
@@ -140,27 +148,31 @@ export default function TaskAttachments({ taskId, workspaceId }: Props) {
       </div>
 
       {isLoading && (
-        <div className="flex items-center justify-center py-6">
-          <Loader className="size-5 animate-spin text-muted-foreground" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-14 w-full rounded-lg" />
+          <Skeleton className="h-14 w-full rounded-lg" />
+          <Skeleton className="h-14 w-3/4 rounded-lg" />
         </div>
       )}
 
       {!isLoading && attachments.length === 0 && (
-        <div
-          className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+        <Empty
+          className="cursor-pointer hover:border-primary/50 transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="size-8 mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Drop files here or click to upload</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
-            Images, PDFs, documents, and archives up to 25 MB
-          </p>
-        </div>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Upload />
+            </EmptyMedia>
+            <EmptyTitle>Drop files here or click to upload</EmptyTitle>
+            <EmptyDescription>Images, PDFs, documents, and archives up to 25 MB</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {/* Attachment gallery */}
       {attachments.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {/* Image previews in grid */}
           {attachments.some((a) => isImage(a.mimeType)) && (
             <div className="grid grid-cols-3 gap-2 mb-3">
@@ -276,6 +288,9 @@ export default function TaskAttachments({ taskId, workspaceId }: Props) {
             <DialogTitle className="text-sm font-medium truncate">
               {previewAttachment?.filename}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Image preview for {previewAttachment?.filename}
+            </DialogDescription>
           </DialogHeader>
           {previewAttachment && (
             <div className="flex items-center justify-center max-h-[70vh] overflow-hidden rounded-md">
@@ -294,7 +309,7 @@ export default function TaskAttachments({ taskId, workspaceId }: Props) {
                 target="_blank"
                 rel="noreferrer"
               >
-                <Download className="size-3.5 mr-1.5" />
+                <Download data-icon="inline-start" className="size-3.5" />
                 Download
               </a>
             </Button>
