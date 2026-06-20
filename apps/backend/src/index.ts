@@ -26,6 +26,7 @@ import timelineRoutes from "./routes/timeline.route"
 import integrationRoutes from "./routes/integration.route"
 import billingRoutes from "./routes/billing.route"
 import notificationRoutes from "./routes/notification.route"
+import attachmentRoutes from "./routes/attachment.route"
 
 const app = express()
 app.set("trust proxy", 1)
@@ -98,6 +99,7 @@ app.use(`${BASE_PATH}/comment`, isAuthenticated, commentRoutes)
 app.use(`${BASE_PATH}/time-log`, isAuthenticated, timeLogRoutes)
 app.use(`${BASE_PATH}/timeline`, isAuthenticated, timelineRoutes)
 app.use(`${BASE_PATH}/notification`, isAuthenticated, notificationRoutes)
+app.use(`${BASE_PATH}/task`, isAuthenticated, attachmentRoutes)
 app.use(`${BASE_PATH}/integration`, integrationRoutes)
 app.use(`${BASE_PATH}/billing`, billingRoutes)
 

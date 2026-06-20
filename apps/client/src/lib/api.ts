@@ -668,3 +668,96 @@ export const markAllNotificationsAsReadMutationFn = async (): Promise<{
   const response = await API.put("/notification/read-all")
   return response.data
 }
+
+// ==========================================
+// TASK ATTACHMENT API FUNCTIONS
+// ==========================================
+
+export const uploadTaskAttachmentMutationFn = async ({
+  workspaceId,
+  taskId,
+  file,
+}: {
+  workspaceId: string
+  taskId: string
+  file: File
+}): Promise<{ message: string; attachment: import("../types/api.type").TaskAttachmentType }> => {
+  const formData = new FormData()
+  formData.append("file", file)
+  const response = await API.post(
+    `/task/${taskId}/workspace/${workspaceId}/attachments`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  )
+  return response.data
+}
+
+export const getTaskAttachmentsQueryFn = async ({
+  workspaceId,
+  taskId,
+}: {
+  workspaceId: string
+  taskId: string
+}): Promise<{
+  message: string
+  attachments: import("../types/api.type").TaskAttachmentType[]
+}> => {
+  const response = await API.get(`/task/${taskId}/workspace/${workspaceId}/attachments`)
+  return response.data
+}
+
+export const deleteTaskAttachmentMutationFn = async ({
+  workspaceId,
+  taskId,
+  attachmentId,
+}: {
+  workspaceId: string
+  taskId: string
+  attachmentId: string
+}): Promise<{ message: string }> => {
+  const response = await API.delete(
+    `/task/${taskId}/workspace/${workspaceId}/attachments/${attachmentId}`,
+  )
+  return response.data
+}
+
+// ==========================================
+// TASK DEPENDENCY API FUNCTIONS
+// ==========================================
+
+export type DependencyType = "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD"
+
+export const addTaskDependencyMutationFn = async ({
+  workspaceId,
+  taskId,
+  dependencyTaskId,
+  type,
+}: {
+  workspaceId: string
+  taskId: string
+  dependencyTaskId: string
+  type: DependencyType
+}): Promise<{ message: string; task: TaskType }> => {
+  const response = await API.post(`/task/${taskId}/workspace/${workspaceId}/dependency`, {
+    dependencyTaskId,
+    type,
+  })
+  return response.data
+}
+
+export const deleteTaskDependencyMutationFn = async ({
+  workspaceId,
+  taskId,
+  dependencyTaskId,
+  type,
+}: {
+  workspaceId: string
+  taskId: string
+  dependencyTaskId: string
+  type: DependencyType
+}): Promise<{ message: string; task: TaskType }> => {
+  const response = await API.delete(
+    `/task/${taskId}/workspace/${workspaceId}/dependency/${dependencyTaskId}/type/${type}`,
+  )
+  return response.data
+}

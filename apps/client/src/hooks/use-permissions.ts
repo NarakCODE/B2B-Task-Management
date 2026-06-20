@@ -1,25 +1,20 @@
-import { PermissionType } from "@/constant";
-import { UserType, WorkspaceWithMembersType } from "@/types/api.type";
-import { useEffect, useMemo, useState } from "react";
+import { PermissionType } from "@/constant"
+import { UserType, WorkspaceWithMembersType } from "@/types/api.type"
+import { useMemo } from "react"
 
 const usePermissions = (
   user: UserType | undefined,
-  workspace: WorkspaceWithMembersType | undefined
+  workspace: WorkspaceWithMembersType | undefined,
 ) => {
-  const [permissions, setPermissions] = useState<PermissionType[]>([]);
-
-  useEffect(() => {
+  return useMemo<PermissionType[]>(() => {
     if (user && workspace) {
-      const member = workspace.members.find(
-        (member) => member.userId === user._id
-      );
+      const member = workspace.members.find((member) => member.userId === user._id)
       if (member) {
-        setPermissions(member.role.permissions || []);
+        return member.role.permissions || []
       }
     }
-  }, [user, workspace]);
+    return []
+  }, [user, workspace])
+}
 
-  return useMemo(() => permissions, [permissions]);
-};
-
-export default usePermissions;
+export default usePermissions

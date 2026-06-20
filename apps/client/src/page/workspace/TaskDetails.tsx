@@ -1,5 +1,15 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Calendar, User, Code, Layers, Clock, ArrowRight, Loader, History } from "lucide-react"
+import {
+  ArrowLeft,
+  Calendar,
+  User,
+  Code,
+  Layers,
+  Clock,
+  ArrowRight,
+  Loader,
+  History,
+} from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/reui/badge"
@@ -18,6 +28,8 @@ import TaskTypeBadge from "@/components/workspace/task/common/task-type-badge"
 import TaskSubtasks from "@/components/workspace/task/task-subtasks"
 import TaskTimeline from "@/components/workspace/task/task-timeline"
 import TaskTimeTracking from "@/components/workspace/task/task-time-tracking"
+import TaskAttachments from "@/components/workspace/task/task-attachments"
+import TaskDependencies from "@/components/workspace/task/task-dependencies"
 
 const priorityStyles: Record<string, string> = {
   HIGH: "destructive-light",
@@ -97,17 +109,21 @@ export default function TaskDetails() {
             {task.taskCode}
           </Badge>
           <TaskTypeBadge type={task.taskType} />
-          <Badge variant={priorityStyles[task.priority] as "outline" | "default"} className="capitalize">
+          <Badge
+            variant={priorityStyles[task.priority] as "outline" | "default"}
+            className="capitalize"
+          >
             {task.priority.toLowerCase()} Priority
           </Badge>
-          <Badge variant={statusStyles[task.status] as "outline" | "default"} className="capitalize">
+          <Badge
+            variant={statusStyles[task.status] as "outline" | "default"}
+            className="capitalize"
+          >
             {task.status.replace("_", " ").toLowerCase()}
           </Badge>
         </div>
 
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {task.title}
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">{task.title}</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -126,6 +142,18 @@ export default function TaskDetails() {
           <Card>
             <CardContent className="pt-6">
               <TaskSubtasks task={task} workspaceId={workspaceId} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <TaskDependencies task={task} workspaceId={workspaceId} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <TaskAttachments taskId={task._id} workspaceId={workspaceId} />
             </CardContent>
           </Card>
 
@@ -188,9 +216,7 @@ export default function TaskDetails() {
                   <Code className="size-3.5" />
                   Sprint
                 </span>
-                <span className="text-sm font-medium">
-                  {task.sprint?.name || "Backlog"}
-                </span>
+                <span className="text-sm font-medium">{task.sprint?.name || "Backlog"}</span>
               </div>
 
               <Separator />
@@ -201,9 +227,7 @@ export default function TaskDetails() {
                   Due Date
                 </span>
                 <span className="text-sm font-medium">
-                  {task.dueDate
-                    ? format(new Date(task.dueDate), "MMM d, yyyy")
-                    : "—"}
+                  {task.dueDate ? format(new Date(task.dueDate), "MMM d, yyyy") : "—"}
                 </span>
               </div>
 
@@ -225,9 +249,7 @@ export default function TaskDetails() {
                   Created
                 </span>
                 <span className="text-sm">
-                  {task.createdAt
-                    ? format(new Date(task.createdAt), "MMM d, yyyy")
-                    : "—"}
+                  {task.createdAt ? format(new Date(task.createdAt), "MMM d, yyyy") : "—"}
                 </span>
               </div>
 
