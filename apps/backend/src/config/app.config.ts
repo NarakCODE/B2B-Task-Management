@@ -1,4 +1,4 @@
-import { getEnv } from "../utils/get-env";
+import { getEnv } from "../utils/get-env"
 
 const appConfig = () => ({
   NODE_ENV: getEnv("NODE_ENV", "development"),
@@ -19,6 +19,10 @@ const appConfig = () => ({
   STRIPE_SECRET_KEY: getEnv("STRIPE_SECRET_KEY", "sk_test_placeholder"),
   STRIPE_WEBHOOK_SECRET: getEnv("STRIPE_WEBHOOK_SECRET", "whsec_placeholder"),
   STRIPE_PRICE_PRO_ID: getEnv("STRIPE_PRICE_PRO_ID", "price_placeholder"),
-});
 
-export const config = appConfig();
+  CLOUDINARY_CLOUD_NAME: getEnv("CLOUDINARY_CLOUD_NAME", ""),
+  CLOUDINARY_API_KEY: getEnv("CLOUDINARY_API_KEY", ""),
+  CLOUDINARY_API_SECRET: getEnv("CLOUDINARY_API_SECRET", ""),
+})
+
+export const config = appConfig()

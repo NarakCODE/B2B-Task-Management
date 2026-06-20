@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { connectDb } from "../lib/db";
-import { TaskModel, WorkspaceModel } from "../lib/models";
+import { connectDb } from "../lib/db.js";
+import { TaskModel, WorkspaceModel } from "../lib/models.js";
 
 export default defineTool({
   description: "Create a new task in a project and workspace.",

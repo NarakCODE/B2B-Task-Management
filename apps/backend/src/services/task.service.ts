@@ -327,6 +327,8 @@ export const getTaskByIdService = async (
   })
     .populate("assignedTo", "_id name profilePicture -password")
     .populate("sprint", "_id name status startDate endDate")
+    .populate("dependencies.task", "_id title taskCode status priority")
+    .populate("attachments.uploadedBy", "_id name profilePicture")
 
   if (!task) {
     throw new NotFoundException("Task not found.")
@@ -409,4 +411,104 @@ export const deleteSubtaskService = async (
   await task.save()
 
   return { message: "Subtask deleted successfully" }
+}
+
+const getInverseDependencyType = (
+  type: "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD",
+): "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD" => {
+  switch (type) {
+    case "BLOCKED_BY":
+      return "BLOCKS"
+    case "BLOCKS":
+      return "BLOCKED_BY"
+    case "PARENT":
+      return "CHILD"
+    case "CHILD":
+      return "PARENT"
+    default:
+      return "RELATED"
+  }
+}
+
+export const addTaskDependencyService = async (
+  workspaceId: string,
+  taskId: string,
+  dependencyTaskId: string,
+  type: "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD",
+) => {
+  if (taskId.toString() === dependencyTaskId.toString()) {
+    throw new BadRequestException("A task cannot depend on itself")
+  }
+
+  const task = await TaskModel.findOne({ _id: taskId, workspace: workspaceId })
+  const depTask = await TaskModel.findOne({ _id: dependencyTaskId, workspace: workspaceId })
+
+  if (!task || !depTask) {
+    throw new NotFoundException("One or both tasks not found in this workspace")
+  }
+
+  // Check if link already exists
+  const exists = task.dependencies.some(
+    (dep) => dep.task.toString() === dependencyTaskId.toString() && dep.type === type,
+  )
+
+  if (exists) {
+    throw new BadRequestException("This dependency relationship already exists")
+  }
+
+  // Add dependency to task
+  task.dependencies.push({ type, task: depTask._id })
+  await task.save()
+
+  // Add inverse dependency to depTask
+  const inverseType = getInverseDependencyType(type)
+  const depExists = depTask.dependencies.some(
+    (dep) => dep.task.toString() === taskId.toString() && dep.type === inverseType,
+  )
+
+  if (!depExists) {
+    depTask.dependencies.push({ type: inverseType, task: task._id })
+    await depTask.save()
+  }
+
+  const populatedTask = await TaskModel.findById(taskId)
+    .populate("assignedTo", "_id name profilePicture -password")
+    .populate("sprint", "_id name status startDate endDate")
+    .populate("dependencies.task", "_id title taskCode status priority")
+
+  return { task: populatedTask }
+}
+
+export const deleteTaskDependencyService = async (
+  workspaceId: string,
+  taskId: string,
+  dependencyTaskId: string,
+  type: "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD",
+) => {
+  const task = await TaskModel.findOne({ _id: taskId, workspace: workspaceId })
+  const depTask = await TaskModel.findOne({ _id: dependencyTaskId, workspace: workspaceId })
+
+  if (!task || !depTask) {
+    throw new NotFoundException("One or both tasks not found in this workspace")
+  }
+
+  // Remove dependency from task
+  task.dependencies = task.dependencies.filter(
+    (dep) => !(dep.task.toString() === dependencyTaskId.toString() && dep.type === type),
+  )
+  await task.save()
+
+  // Remove inverse dependency from depTask
+  const inverseType = getInverseDependencyType(type)
+  depTask.dependencies = depTask.dependencies.filter(
+    (dep) => !(dep.task.toString() === taskId.toString() && dep.type === inverseType),
+  )
+  await depTask.save()
+
+  const populatedTask = await TaskModel.findById(taskId)
+    .populate("assignedTo", "_id name profilePicture -password")
+    .populate("sprint", "_id name status startDate endDate")
+    .populate("dependencies.task", "_id title taskCode status priority")
+
+  return { task: populatedTask }
 }

@@ -297,6 +297,32 @@ export type SubTaskType = {
   createdAt: string
 }
 
+export type TaskDependencyType = {
+  type: "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD"
+  task: {
+    _id: string
+    title: string
+    taskCode: string
+    status: TaskStatusEnumType
+    priority: TaskPriorityEnumType
+  }
+}
+
+export type TaskAttachmentType = {
+  _id: string
+  filename: string
+  url: string
+  publicId: string
+  mimeType: string
+  size: number
+  uploadedBy: {
+    _id: string
+    name: string
+    profilePicture: string | null
+  }
+  createdAt: string
+}
+
 export type TaskType = {
   _id: string
   title: string
@@ -328,6 +354,8 @@ export type TaskType = {
   taskCode: string
   createdAt?: string
   updatedAt?: string
+  dependencies?: TaskDependencyType[]
+  attachments?: TaskAttachmentType[]
 }
 
 export type AllTaskPayloadType = {

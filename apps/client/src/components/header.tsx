@@ -80,9 +80,12 @@ const Header = () => {
       </div>
       <div className="flex items-center gap-2 px-3">
         <NotificationCenter />
+
+        <ModeToggle />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="rounded-full h-8 gap-1.5 pr-2.5 pl-1">
+            <Button variant="outline">
               <Avatar className="border-background size-6 border">
                 <AvatarImage src={user?.profilePicture || ""} alt={name} />
                 <AvatarFallback className={`${avatarColor} text-[10px]`}>{initials}</AvatarFallback>
@@ -110,7 +113,6 @@ const Header = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <ModeToggle />
       </div>
     </header>
   )

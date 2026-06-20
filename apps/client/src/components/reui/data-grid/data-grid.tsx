@@ -9,6 +9,7 @@ interface DataGridContextType<TData> {
   isLoading?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DataGridContext = createContext<DataGridContextType<any> | null>(null)
 
 export function useDataGrid<TData>() {
@@ -26,12 +27,7 @@ interface DataGridProps<TData> {
   children: ReactNode
 }
 
-export function DataGrid<TData>({
-  table,
-  recordCount,
-  isLoading,
-  children,
-}: DataGridProps<TData>) {
+export function DataGrid<TData>({ table, recordCount, isLoading, children }: DataGridProps<TData>) {
   return (
     <DataGridContext.Provider value={{ table, recordCount, isLoading }}>
       {children}

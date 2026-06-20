@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from "express"
 import {
   createTaskController,
   deleteTaskController,
@@ -8,42 +8,33 @@ import {
   addSubtaskController,
   toggleSubtaskController,
   deleteSubtaskController,
-} from "../controllers/task.controller";
+  addTaskDependencyController,
+  deleteTaskDependencyController,
+} from "../controllers/task.controller"
 
-const taskRoutes = Router();
+const taskRoutes = Router()
 
-taskRoutes.post(
-  "/project/:projectId/workspace/:workspaceId/create",
-  createTaskController
-);
+taskRoutes.post("/project/:projectId/workspace/:workspaceId/create", createTaskController)
 
-taskRoutes.delete("/:id/workspace/:workspaceId/delete", deleteTaskController);
+taskRoutes.delete("/:id/workspace/:workspaceId/delete", deleteTaskController)
 
-taskRoutes.put(
-  "/:id/project/:projectId/workspace/:workspaceId/update",
-  updateTaskController
-);
+taskRoutes.put("/:id/project/:projectId/workspace/:workspaceId/update", updateTaskController)
 
-taskRoutes.get("/workspace/:workspaceId/all", getAllTasksController);
+taskRoutes.get("/workspace/:workspaceId/all", getAllTasksController)
 
-taskRoutes.get(
-  "/:id/project/:projectId/workspace/:workspaceId",
-  getTaskByIdController
-);
+taskRoutes.get("/:id/project/:projectId/workspace/:workspaceId", getTaskByIdController)
 
-taskRoutes.post(
-  "/:id/workspace/:workspaceId/subtask/create",
-  addSubtaskController
-);
+taskRoutes.post("/:id/workspace/:workspaceId/subtask/create", addSubtaskController)
 
-taskRoutes.patch(
-  "/:id/workspace/:workspaceId/subtask/:subtaskId/toggle",
-  toggleSubtaskController
-);
+taskRoutes.patch("/:id/workspace/:workspaceId/subtask/:subtaskId/toggle", toggleSubtaskController)
+
+taskRoutes.delete("/:id/workspace/:workspaceId/subtask/:subtaskId/delete", deleteSubtaskController)
+
+taskRoutes.post("/:id/workspace/:workspaceId/dependency", addTaskDependencyController)
 
 taskRoutes.delete(
-  "/:id/workspace/:workspaceId/subtask/:subtaskId/delete",
-  deleteSubtaskController
-);
+  "/:id/workspace/:workspaceId/dependency/:dependencyTaskId/type/:type",
+  deleteTaskDependencyController,
+)
 
-export default taskRoutes;
+export default taskRoutes

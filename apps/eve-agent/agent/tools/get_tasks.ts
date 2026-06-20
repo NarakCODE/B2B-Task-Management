@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-import { connectDb } from "../lib/db";
-import { TaskModel } from "../lib/models";
+import { connectDb } from "../lib/db.js";
+import { TaskModel } from "../lib/models.js";
 
 export default defineTool({
   description: "Get tasks in a specific workspace and optionally filter by project and status.",
