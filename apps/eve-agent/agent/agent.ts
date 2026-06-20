@@ -15,9 +15,9 @@ function getMessageText(message: any): string {
 const mockModel = new MockLanguageModelV4({
   provider: "mock-provider",
   modelId: "mock-model",
-  doGenerate: (async (options) => {
+  doGenerate: (async (options: any) => {
     const lastMessage = options.prompt[options.prompt.length - 1];
-    const isToolResult = lastMessage?.role === "tool" || (Array.isArray(lastMessage?.content) && lastMessage.content.some((c) => c.type === "tool-result"));
+    const isToolResult = lastMessage?.role === "tool" || (Array.isArray(lastMessage?.content) && lastMessage.content.some((c: any) => c.type === "tool-result"));
 
     if (isToolResult) {
       return {
@@ -66,7 +66,9 @@ const mockModel = new MockLanguageModelV4({
       };
     }
   }) as any,
-  doStream: (async (options) => {
+  doStream: (async (options: any) => {
+    const lastMessage = options.prompt[options.prompt.length - 1];
+    const isToolResult = lastMessage?.role === "tool" || (Array.isArray(lastMessage?.content) && lastMessage.content.some((c: any) => c.type === "tool-result"));
     let chunks: any[] = [];
     if (isToolResult) {
       let toolName = "";
@@ -75,7 +77,7 @@ const mockModel = new MockLanguageModelV4({
       for (let i = options.prompt.length - 1; i >= 0; i--) {
         const msg = options.prompt[i];
         const contents = Array.isArray(msg.content) ? msg.content : [];
-        const resultPart = contents.find(c => c.type === "tool-result");
+        const resultPart = contents.find((c: any) => c.type === "tool-result");
         if (resultPart) {
           const rp = resultPart as { toolName: string; result: unknown };
           toolName = rp.toolName;
