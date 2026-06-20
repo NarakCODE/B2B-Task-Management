@@ -17,6 +17,7 @@ import TaskCommentList from "@/components/workspace/task/task-comment-list"
 import TaskTypeBadge from "@/components/workspace/task/common/task-type-badge"
 import TaskSubtasks from "@/components/workspace/task/task-subtasks"
 import TaskTimeline from "@/components/workspace/task/task-timeline"
+import TaskTimeTracking from "@/components/workspace/task/task-time-tracking"
 
 const priorityStyles: Record<string, string> = {
   HIGH: "destructive-light",
@@ -244,6 +245,16 @@ export default function TaskDetails() {
                   </div>
                 </>
               )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4 pt-5">
+              <TaskTimeTracking
+                taskId={task._id}
+                workspaceId={workspaceId}
+                storyPoints={task.storyPoints}
+              />
             </CardContent>
           </Card>
         </div>
