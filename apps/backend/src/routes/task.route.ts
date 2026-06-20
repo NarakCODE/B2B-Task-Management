@@ -10,6 +10,8 @@ import {
   deleteSubtaskController,
   addTaskDependencyController,
   deleteTaskDependencyController,
+  reorderTasksController,
+  getBacklogTasksController,
 } from "../controllers/task.controller"
 
 const taskRoutes = Router()
@@ -36,5 +38,9 @@ taskRoutes.delete(
   "/:id/workspace/:workspaceId/dependency/:dependencyTaskId/type/:type",
   deleteTaskDependencyController,
 )
+
+taskRoutes.put("/workspace/:workspaceId/reorder", reorderTasksController)
+
+taskRoutes.get("/workspace/:workspaceId/backlog", getBacklogTasksController)
 
 export default taskRoutes

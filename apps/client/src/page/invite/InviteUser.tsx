@@ -1,60 +1,51 @@
-import { Loader } from "lucide-react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import Logo from "@/components/logo";
-import { Button } from "@/components/ui/button";
-import { BASE_ROUTE } from "@/routes/common/routePaths";
-import useAuth from "@/hooks/api/use-auth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { invitedUserJoinWorkspaceMutationFn } from "@/lib/api";
-import { toast } from "sonner";
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Logo from "@/components/logo"
+import { Button } from "@/components/ui/button"
+import { Spinner } from "@/components/ui/spinner"
+import { BASE_ROUTE } from "@/routes/common/routePaths"
+import useAuth from "@/hooks/api/use-auth"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { invitedUserJoinWorkspaceMutationFn } from "@/lib/api"
+import { toast } from "sonner"
 
 const InviteUser = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const param = useParams();
-  const inviteCode = param.inviteCode as string;
+  const param = useParams()
+  const inviteCode = param.inviteCode as string
 
-  const { data: authData, isPending } = useAuth();
-  const user = authData?.user;
+  const { data: authData, isPending } = useAuth()
+  const user = authData?.user
 
   const { mutate, isPending: isLoading } = useMutation({
     mutationFn: invitedUserJoinWorkspaceMutationFn,
-  });
+  })
 
   const returnUrl = encodeURIComponent(
-    `${BASE_ROUTE.INVITE_URL.replace(":inviteCode", inviteCode)}`
-  );
+    `${BASE_ROUTE.INVITE_URL.replace(":inviteCode", inviteCode)}`,
+  )
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+    e.preventDefault()
     mutate(inviteCode, {
       onSuccess: (data) => {
         queryClient.resetQueries({
           queryKey: ["userWorkspaces"],
-        });
-        navigate(`/workspace/${data.workspaceId}`);
+        })
+        navigate(`/workspace/${data.workspaceId}`)
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(error.message)
       },
-    });
-  };
+    })
+  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-md flex-col gap-6">
-        <Link
-          to="/"
-          className="flex items-center gap-2 self-center font-medium"
-        >
+        <Link to="/" className="flex items-center gap-2 self-center font-medium">
           <Logo />
           Team Sync.
         </Link>
@@ -65,42 +56,31 @@ const InviteUser = () => {
                 Hey there! You're invited to join a TeamSync Workspace!
               </CardTitle>
               <CardDescription>
-                Looks like you need to be logged into your TeamSync account to
-                join this Workspace.
+                Looks like you need to be logged into your TeamSync account to join this Workspace.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {isPending ? (
-                <Loader className="!w-11 !h-11 animate-spin place-self-center flex" />
+                <div className="flex justify-center py-4">
+                  <Spinner className="size-11" />
+                </div>
               ) : (
                 <div>
                   {user ? (
-                    <div className="flex items-center justify-center my-3">
+                    <div className="flex justify-center py-3">
                       <form onSubmit={handleSubmit}>
-                        <Button
-                          type="submit"
-                          disabled={isLoading}
-                          className="!bg-green-500 !text-white text-[23px] !h-auto"
-                        >
-                          {isLoading && (
-                            <Loader className="!w-6 !h-6 animate-spin" />
-                          )}
+                        <Button type="submit" disabled={isLoading} className="w-full">
+                          {isLoading && <Spinner data-icon="inline-start" />}
                           Join the Workspace
                         </Button>
                       </form>
                     </div>
                   ) : (
-                    <div className="flex flex-col md:flex-row items-center gap-2">
-                      <Link
-                        className="flex-1 w-full text-base"
-                        to={`/sign-up?returnUrl=${returnUrl}`}
-                      >
+                    <div className="flex flex-col gap-2 md:flex-row">
+                      <Link className="flex-1" to={`/sign-up?returnUrl=${returnUrl}`}>
                         <Button className="w-full">Signup</Button>
                       </Link>
-                      <Link
-                        className="flex-1 w-full text-base"
-                        to={`/?returnUrl=${returnUrl}`}
-                      >
+                      <Link className="flex-1" to={`/?returnUrl=${returnUrl}`}>
                         <Button variant="secondary" className="w-full border">
                           Login
                         </Button>
@@ -114,7 +94,7 @@ const InviteUser = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default InviteUser;
+export default InviteUser

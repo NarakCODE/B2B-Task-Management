@@ -51,6 +51,8 @@ export type WorkspaceType = {
   description?: string
   owner: string
   inviteCode: string
+  logo?: string | null
+  logoPublicId?: string | null
 }
 
 export type CreateWorkspaceType = {
@@ -540,4 +542,41 @@ export type NotificationType = {
   isRead: boolean
   createdAt: string
   updatedAt: string
+}
+
+export type DocumentCategoryType = "SPEC" | "CONTRACT" | "DESIGN" | "REPORT" | "OTHER"
+
+export type WorkspaceDocumentType = {
+  _id: string
+  title: string
+  description: string | null
+  category: DocumentCategoryType
+  filename: string
+  url: string
+  publicId: string
+  mimeType: string
+  size: number
+  uploadedBy: {
+    _id: string
+    name: string
+    profilePicture: string | null
+  }
+  workspace: string
+  createdAt: string
+  updatedAt: string
+}
+
+export type WorkspaceDocumentsResponseType = {
+  message: string
+  documents: WorkspaceDocumentType[]
+}
+
+export type CreateDocumentPayloadType = {
+  workspaceId: string
+  file: File
+  data: {
+    title?: string
+    description?: string
+    category?: DocumentCategoryType
+  }
 }
