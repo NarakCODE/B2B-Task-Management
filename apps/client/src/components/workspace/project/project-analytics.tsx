@@ -3,6 +3,7 @@ import AnalyticsCard from "../common/analytics-card";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { useQuery } from "@tanstack/react-query";
 import { getProjectAnalyticsQueryFn } from "@/lib/api";
+import AnalyticsCharts from "@/components/workspace/common/analytics-charts";
 
 const ProjectAnalytics = () => {
   const param = useParams();
@@ -20,23 +21,26 @@ const ProjectAnalytics = () => {
   const analytics = data?.analytics;
 
   return (
-    <div className="grid gap-4 md:gap-5 lg:grid-cols-2 xl:grid-cols-3">
-      <AnalyticsCard
-        isLoading={isPending}
-        title="Total Task"
-        value={analytics?.totalTasks || 0}
-      />
-      <AnalyticsCard
-        isLoading={isPending}
-        title="Overdue Task"
-        value={analytics?.overdueTasks || 0}
-        trend={analytics && analytics.overdueTasks > 0 ? "down" : "up"}
-      />
-      <AnalyticsCard
-        isLoading={isPending}
-        title="Completed Task"
-        value={analytics?.completedTasks || 0}
-      />
+    <div className="space-y-6 w-full">
+      <div className="grid gap-4 md:gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        <AnalyticsCard
+          isLoading={isPending}
+          title="Total Task"
+          value={analytics?.totalTasks || 0}
+        />
+        <AnalyticsCard
+          isLoading={isPending}
+          title="Overdue Task"
+          value={analytics?.overdueTasks || 0}
+          trend={analytics && analytics.overdueTasks > 0 ? "down" : "up"}
+        />
+        <AnalyticsCard
+          isLoading={isPending}
+          title="Completed Task"
+          value={analytics?.completedTasks || 0}
+        />
+      </div>
+      <AnalyticsCharts analytics={analytics} isLoading={isPending} />
     </div>
   );
 };

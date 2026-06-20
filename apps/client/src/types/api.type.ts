@@ -131,6 +131,8 @@ export type AnalyticsResponseType = {
     totalTasks: number;
     overdueTasks: number;
     completedTasks: number;
+    tasksByStatus?: { _id: string; count: number }[];
+    tasksByPriority?: { _id: string; count: number }[];
   };
 };
 

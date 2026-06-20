@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { ComponentProps, useState, useEffect, useMemo } from "react"
-import { useParams, useNavigate } from "react-router-dom"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Badge } from "@/components/reui/badge"
+import { ComponentProps, useState, useEffect, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Badge } from "@/components/reui/badge";
 import {
   Kanban,
   KanbanBoard,
@@ -13,39 +13,35 @@ import {
   KanbanItem,
   KanbanItemHandle,
   KanbanOverlay,
-} from "@/components/reui/kanban"
+} from "@/components/reui/kanban";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { GripVertical as GripVerticalIcon } from "lucide-react"
-import { toast } from "sonner"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { GripVertical as GripVerticalIcon } from "lucide-react";
+import { toast } from "sonner";
 
-import useWorkspaceId from "@/hooks/use-workspace-id"
-import useTaskTableFilter from "@/hooks/use-task-table-filter"
-import { getAllTasksQueryFn, editTaskMutationFn } from "@/lib/api"
-import { TaskType, EditTaskPayloadType } from "@/types/api.type"
-import { TaskStatusEnumType } from "@/constant"
-import { UniqueIdentifier } from "@dnd-kit/core"
-import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper"
+import useWorkspaceId from "@/hooks/use-workspace-id";
+import useTaskTableFilter from "@/hooks/use-task-table-filter";
+import { getAllTasksQueryFn, editTaskMutationFn } from "@/lib/api";
+import { TaskType, EditTaskPayloadType } from "@/types/api.type";
+import { TaskStatusEnumType } from "@/constant";
+import { UniqueIdentifier } from "@dnd-kit/core";
+import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper";
 
-import { DataTableFilterToolbar } from "./task-table"
+import { DataTableFilterToolbar } from "./task-table";
 
 // Task interface for ReUI Kanban structure
 interface Task {
-  id: string
-  title: string
-  priority: "low" | "medium" | "high"
-  description?: string
-  assignee?: string
-  assigneeAvatar?: string
-  dueDate?: string
+  id: string;
+  title: string;
+  priority: "low" | "medium" | "high";
+  description?: string;
+  assignee?: string;
+  assigneeAvatar?: string;
+  dueDate?: string;
   // Store full original task object to easily access fields on update
-  rawTask: TaskType
+  rawTask: TaskType;
 }
 
 const COLUMN_TITLES: Record<string, string> = {
@@ -54,25 +50,34 @@ const COLUMN_TITLES: Record<string, string> = {
   IN_PROGRESS: "In Progress",
   IN_REVIEW: "In Review",
   DONE: "Done",
-}
+};
 
 interface TaskCardProps extends Omit<
   ComponentProps<typeof KanbanItem>,
   "value" | "children"
 > {
-  task: Task
-  asHandle?: boolean
-  isOverlay?: boolean
-  onClick?: () => void
+  task: Task;
+  asHandle?: boolean;
+  isOverlay?: boolean;
+  onClick?: () => void;
 }
 
-function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProps) {
-  const assigneeName = task.assignee || "Unassigned"
-  const initials = getAvatarFallbackText(assigneeName)
-  const avatarColor = getAvatarColor(assigneeName)
+function TaskCard({
+  task,
+  asHandle,
+  isOverlay,
+  onClick,
+  ...props
+}: TaskCardProps) {
+  const assigneeName = task.assignee || "Unassigned";
+  const initials = getAvatarFallbackText(assigneeName);
+  const avatarColor = getAvatarColor(assigneeName);
 
   const cardContent = (
-    <Card onClick={onClick} className="cursor-pointer hover:border-primary/40 dark:hover:border-primary/25 transition-all select-none">
+    <Card
+      onClick={onClick}
+      className="cursor-pointer hover:border-primary/40 dark:hover:border-primary/25 transition-all select-none"
+    >
       <CardContent className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <span className="line-clamp-2 text-sm font-medium text-foreground leading-snug">
@@ -96,7 +101,9 @@ function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProp
             <div className="flex items-center gap-1.5">
               <Avatar className="size-4.5">
                 <AvatarImage src={task.assigneeAvatar} />
-                <AvatarFallback className={`text-[8px] font-bold ${avatarColor}`}>
+                <AvatarFallback
+                  className={`text-[8px] font-bold ${avatarColor}`}
+                >
                   {initials}
                 </AvatarFallback>
               </Avatar>
@@ -111,7 +118,7 @@ function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProp
         </div>
       </CardContent>
     </Card>
-  )
+  );
 
   return (
     <KanbanItem value={task.id} {...props}>
@@ -121,21 +128,31 @@ function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProp
         cardContent
       )}
     </KanbanItem>
-  )
+  );
 }
 
 interface TaskColumnProps extends Omit<
   ComponentProps<typeof KanbanColumn>,
   "children"
 > {
-  tasks: Task[]
-  isOverlay?: boolean
-  onTaskClick?: (task: Task) => void
+  tasks: Task[];
+  isOverlay?: boolean;
+  onTaskClick?: (task: Task) => void;
 }
 
-function TaskColumn({ value, tasks, isOverlay, onTaskClick, ...props }: TaskColumnProps) {
+function TaskColumn({
+  value,
+  tasks,
+  isOverlay,
+  onTaskClick,
+  ...props
+}: TaskColumnProps) {
   return (
-    <KanbanColumn value={value} {...props} className="w-[300px] shrink-0 h-full max-h-[calc(100vh-280px)]">
+    <KanbanColumn
+      value={value}
+      {...props}
+      className="w-[300px] shrink-0 h-full max-h-[calc(100vh-280px)]"
+    >
       <Card className="flex flex-col h-full bg-muted/20 dark:bg-zinc-950/10 border-dashed border-2">
         <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
           <div className="flex items-center gap-2">
@@ -153,7 +170,10 @@ function TaskColumn({ value, tasks, isOverlay, onTaskClick, ...props }: TaskColu
           </KanbanColumnHandle>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto p-3">
-          <KanbanColumnContent value={value} className="flex flex-col gap-2 min-h-[150px]">
+          <KanbanColumnContent
+            value={value}
+            className="flex flex-col gap-2 min-h-[150px]"
+          >
             {tasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -167,16 +187,16 @@ function TaskColumn({ value, tasks, isOverlay, onTaskClick, ...props }: TaskColu
         </CardContent>
       </Card>
     </KanbanColumn>
-  )
+  );
 }
 
 export default function KanbanBoardView() {
-  const param = useParams()
-  const projectId = param.projectId as string
-  const workspaceId = useWorkspaceId()
-  const navigate = useNavigate()
-  const [filters, setFilters] = useTaskTableFilter()
-  const queryClient = useQueryClient()
+  const param = useParams();
+  const projectId = param.projectId as string;
+  const workspaceId = useWorkspaceId();
+  const navigate = useNavigate();
+  const [filters, setFilters] = useTaskTableFilter();
+  const queryClient = useQueryClient();
 
   // Fetch tasks
   const { data, isLoading } = useQuery({
@@ -195,9 +215,9 @@ export default function KanbanBoardView() {
         pageSize: 100,
       }),
     staleTime: 0,
-  })
+  });
 
-  const tasks: TaskType[] = useMemo(() => data?.tasks || [], [data?.tasks])
+  const tasks: TaskType[] = useMemo(() => data?.tasks || [], [data?.tasks]);
 
   // Map server TaskType to ReUI Task model
   const mapServerTaskToClientTask = (task: TaskType): Task => ({
@@ -214,7 +234,7 @@ export default function KanbanBoardView() {
         })
       : undefined,
     rawTask: task,
-  })
+  });
 
   // Group tasks by column
   const columnsData = useMemo(() => {
@@ -224,17 +244,17 @@ export default function KanbanBoardView() {
       IN_PROGRESS: [],
       IN_REVIEW: [],
       DONE: [],
-    }
+    };
 
     tasks.forEach((t) => {
-      const statusKey = t.status
+      const statusKey = t.status;
       if (cols[statusKey]) {
-        cols[statusKey].push(mapServerTaskToClientTask(t))
+        cols[statusKey].push(mapServerTaskToClientTask(t));
       }
-    })
+    });
 
-    return cols
-  }, [tasks])
+    return cols;
+  }, [tasks]);
 
   // Local state for dnd-kit column representation
   const [localColumns, setLocalColumns] = useState<Record<string, Task[]>>({
@@ -243,15 +263,15 @@ export default function KanbanBoardView() {
     IN_PROGRESS: [],
     IN_REVIEW: [],
     DONE: [],
-  })
+  });
 
   // Synchronize local columns with server query updates
   useEffect(() => {
     if (data) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLocalColumns(columnsData)
+      setLocalColumns(columnsData);
     }
-  }, [columnsData, data])
+  }, [columnsData, data]);
 
   // Mutation to update task status in the database
   const { mutate } = useMutation<
@@ -262,41 +282,43 @@ export default function KanbanBoardView() {
   >({
     mutationFn: editTaskMutationFn,
     onMutate: async () => {
-      return { previousColumns: localColumns }
+      return { previousColumns: localColumns };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["all-tasks"] })
-      toast.success("Task status updated")
+      queryClient.invalidateQueries({ queryKey: ["all-tasks"] });
+      toast.success("Task status updated");
     },
     onError: (_err, _variables, context) => {
       // Revert local state on error
       if (context?.previousColumns) {
-        setLocalColumns(context.previousColumns)
+        setLocalColumns(context.previousColumns);
       }
-      toast.error("Failed to move task. Please try again.")
+      toast.error("Failed to move task. Please try again.");
     },
-  })
+  });
 
   // Handle local state updates from dnd-kit dragging
   const handleColumnsChange = (newColumns: Record<string, Task[]>) => {
-    setLocalColumns(newColumns)
+    setLocalColumns(newColumns);
 
     // Check which task changed status (moved columns)
-    let movedTaskId = ""
-    let targetStatus = ""
+    let movedTaskId = "";
+    let targetStatus = "";
 
     for (const [colId, newTasks] of Object.entries(newColumns)) {
-      const prevTasks = localColumns[colId] || []
-      const moved = newTasks.find((nt) => !prevTasks.some((pt) => pt.id === nt.id))
+      const prevTasks = localColumns[colId] || [];
+      const moved = newTasks.find(
+        (nt) => !prevTasks.some((pt) => pt.id === nt.id),
+      );
       if (moved) {
-        movedTaskId = moved.id
-        targetStatus = colId
-        break
+        movedTaskId = moved.id;
+        targetStatus = colId;
+        break;
       }
     }
 
     if (movedTaskId && targetStatus) {
-      const task = tasks.find((t) => t._id === movedTaskId)
+      const task = tasks.find((t) => t._id === movedTaskId);
       if (task) {
         mutate({
           taskId: task._id,
@@ -308,37 +330,42 @@ export default function KanbanBoardView() {
             status: targetStatus as TaskStatusEnumType,
             priority: task.priority,
             assignedTo: task.assignedTo?._id || null,
-            dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : undefined,
+            dueDate: task.dueDate
+              ? new Date(task.dueDate).toISOString()
+              : undefined,
             taskType: task.taskType,
             storyPoints: task.storyPoints || null,
             sprint: task.sprint?._id || null,
           },
-        })
+        });
       }
     }
-  }
+  };
 
-  const renderOverlay = (params: { value: UniqueIdentifier; variant: "column" | "item" }) => {
-    const { value, variant } = params
+  const renderOverlay = (params: {
+    value: UniqueIdentifier;
+    variant: "column" | "item";
+  }) => {
+    const { value, variant } = params;
     if (variant === "column") {
-      const colValue = value as string
-      const colTasks = localColumns[colValue] || []
-      return <TaskColumn value={colValue} tasks={colTasks} isOverlay />
+      const colValue = value as string;
+      const colTasks = localColumns[colValue] || [];
+      return <TaskColumn value={colValue} tasks={colTasks} isOverlay />;
     } else {
-      const itemId = value as string
+      const itemId = value as string;
       // Find the task across all columns
-      let task: Task | undefined
+      let task: Task | undefined;
       for (const colTasks of Object.values(localColumns)) {
-        task = colTasks.find((t) => t.id === itemId)
-        if (task) break
+        task = colTasks.find((t) => t.id === itemId);
+        if (task) break;
       }
-      if (!task) return null
-      return <TaskCard task={task} isOverlay />
+      if (!task) return null;
+      return <TaskCard task={task} isOverlay />;
     }
-  }
+  };
 
   return (
-    <>
+    <div className="my-4">
       {/* Filter toolbar */}
       <DataTableFilterToolbar
         isLoading={isLoading}
@@ -360,7 +387,9 @@ export default function KanbanBoardView() {
               value={columnValue}
               tasks={tasks}
               onTaskClick={(task) =>
-                navigate(`/workspace/${workspaceId}/project/${projectId}/task/${task.rawTask._id}`)
+                navigate(
+                  `/workspace/${workspaceId}/project/${projectId}/task/${task.rawTask._id}`,
+                )
               }
             />
           ))}
@@ -370,6 +399,6 @@ export default function KanbanBoardView() {
           {renderOverlay as any}
         </KanbanOverlay>
       </Kanban>
-    </>
-  )
+    </div>
+  );
 }

@@ -117,25 +117,64 @@ export const getWorkspaceMembersService = async (workspaceId: string) => {
 export const getWorkspaceAnalyticsService = async (workspaceId: string) => {
   const currentDate = new Date();
 
-  const totalTasks = await TaskModel.countDocuments({
-    workspace: workspaceId,
-  });
+  const taskAnalytics = await TaskModel.aggregate([
+    {
+      $match: {
+        workspace: new mongoose.Types.ObjectId(workspaceId),
+      },
+    },
+    {
+      $facet: {
+        totalTasks: [{ $count: "count" }],
+        overdueTasks: [
+          {
+            $match: {
+              dueDate: { $lt: currentDate },
+              status: {
+                $ne: TaskStatusEnum.DONE,
+              },
+            },
+          },
+          {
+            $count: "count",
+          },
+        ],
+        completedTasks: [
+          {
+            $match: {
+              status: TaskStatusEnum.DONE,
+            },
+          },
+          { $count: "count" },
+        ],
+        tasksByStatus: [
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        tasksByPriority: [
+          {
+            $group: {
+              _id: "$priority",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+      },
+    },
+  ]);
 
-  const overdueTasks = await TaskModel.countDocuments({
-    workspace: workspaceId,
-    dueDate: { $lt: currentDate },
-    status: { $ne: TaskStatusEnum.DONE },
-  });
-
-  const completedTasks = await TaskModel.countDocuments({
-    workspace: workspaceId,
-    status: TaskStatusEnum.DONE,
-  });
+  const _analytics = taskAnalytics[0];
 
   const analytics = {
-    totalTasks,
-    overdueTasks,
-    completedTasks,
+    totalTasks: _analytics.totalTasks[0]?.count || 0,
+    overdueTasks: _analytics.overdueTasks[0]?.count || 0,
+    completedTasks: _analytics.completedTasks[0]?.count || 0,
+    tasksByStatus: _analytics.tasksByStatus || [],
+    tasksByPriority: _analytics.tasksByPriority || [],
   };
 
   return { analytics };

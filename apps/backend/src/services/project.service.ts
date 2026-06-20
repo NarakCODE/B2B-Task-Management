@@ -118,6 +118,22 @@ export const getProjectAnalyticsService = async (
           },
           { $count: "count" },
         ],
+        tasksByStatus: [
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+            },
+          },
+        ],
+        tasksByPriority: [
+          {
+            $group: {
+              _id: "$priority",
+              count: { $sum: 1 },
+            },
+          },
+        ],
       },
     },
   ]);
@@ -128,6 +144,8 @@ export const getProjectAnalyticsService = async (
     totalTasks: _analytics.totalTasks[0]?.count || 0,
     overdueTasks: _analytics.overdueTasks[0]?.count || 0,
     completedTasks: _analytics.completedTasks[0]?.count || 0,
+    tasksByStatus: _analytics.tasksByStatus || [],
+    tasksByPriority: _analytics.tasksByPriority || [],
   };
 
   return {
