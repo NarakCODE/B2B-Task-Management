@@ -277,10 +277,32 @@ export type EditTaskPayloadType = {
   }>;
 };
 
+export type CreateSubtaskPayloadType = {
+  taskId: string;
+  workspaceId: string;
+  data: {
+    title: string;
+  };
+};
+
+export type SubtaskPayloadType = {
+  taskId: string;
+  workspaceId: string;
+  subtaskId: string;
+};
+
+
+export type SubTaskType = {
+  _id: string;
+  title: string;
+  isCompleted: boolean;
+  createdAt: string;
+};
 
 export type TaskType = {
   _id: string;
   title: string;
+  subtasks?: SubTaskType[];
   description?: string;
   project?: {
     _id: string;

@@ -10,6 +10,9 @@ import {
   CreateProjectPayloadType,
   CreateTaskPayloadType,
   EditTaskPayloadType,
+  CreateSubtaskPayloadType,
+  SubtaskPayloadType,
+  SubTaskType,
   CreateWorkspaceResponseType,
   EditProjectPayloadType,
   ProjectByIdPayloadType,
@@ -651,5 +654,39 @@ export const createPortalSessionMutationFn = async (
   workspaceId: string
 ): Promise<{ message: string; url: string }> => {
   const response = await API.post(`/billing/portal/${workspaceId}`);
+  return response.data;
+};
+
+export const createSubtaskMutationFn = async ({
+  taskId,
+  workspaceId,
+  data,
+}: CreateSubtaskPayloadType): Promise<{ message: string; subtask: SubTaskType }> => {
+  const response = await API.post(
+    `/task/${taskId}/workspace/${workspaceId}/subtask/create`,
+    data
+  );
+  return response.data;
+};
+
+export const toggleSubtaskMutationFn = async ({
+  taskId,
+  workspaceId,
+  subtaskId,
+}: SubtaskPayloadType): Promise<{ message: string; subtask: SubTaskType }> => {
+  const response = await API.patch(
+    `/task/${taskId}/workspace/${workspaceId}/subtask/${subtaskId}/toggle`
+  );
+  return response.data;
+};
+
+export const deleteSubtaskMutationFn = async ({
+  taskId,
+  workspaceId,
+  subtaskId,
+}: SubtaskPayloadType): Promise<{ message: string }> => {
+  const response = await API.delete(
+    `/task/${taskId}/workspace/${workspaceId}/subtask/${subtaskId}/delete`
+  );
   return response.data;
 };

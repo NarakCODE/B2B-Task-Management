@@ -365,7 +365,7 @@ export default function KanbanBoardView() {
   };
 
   return (
-    <div className="my-4">
+    <div className="w-full">
       {/* Filter toolbar */}
       <DataTableFilterToolbar
         isLoading={isLoading}
@@ -379,6 +379,7 @@ export default function KanbanBoardView() {
         value={localColumns}
         onValueChange={handleColumnsChange}
         getItemValue={(item) => item.id}
+        className="mt-4"
       >
         <KanbanBoard className="flex gap-4 overflow-x-auto items-start min-h-[calc(100vh-310px)] h-full">
           {Object.entries(localColumns).map(([columnValue, tasks]) => (

@@ -294,3 +294,66 @@ export const deleteTaskService = async (
 
   return;
 };
+
+export const addSubtaskService = async (
+  workspaceId: string,
+  taskId: string,
+  body: { title: string }
+) => {
+  const task = await TaskModel.findOne({ _id: taskId, workspace: workspaceId });
+  if (!task) {
+    throw new NotFoundException("Task not found in this workspace");
+  }
+
+  task.subtasks.push({
+    title: body.title,
+    isCompleted: false,
+  } as any);
+
+  await task.save();
+
+  const newSubtask = task.subtasks[task.subtasks.length - 1];
+  return { subtask: newSubtask };
+};
+
+export const toggleSubtaskService = async (
+  workspaceId: string,
+  taskId: string,
+  subtaskId: string
+) => {
+  const task = await TaskModel.findOne({ _id: taskId, workspace: workspaceId });
+  if (!task) {
+    throw new NotFoundException("Task not found in this workspace");
+  }
+
+  const subtask = task.subtasks.id(subtaskId);
+  if (!subtask) {
+    throw new NotFoundException("Subtask not found");
+  }
+
+  subtask.isCompleted = !subtask.isCompleted;
+  await task.save();
+
+  return { subtask };
+};
+
+export const deleteSubtaskService = async (
+  workspaceId: string,
+  taskId: string,
+  subtaskId: string
+) => {
+  const task = await TaskModel.findOne({ _id: taskId, workspace: workspaceId });
+  if (!task) {
+    throw new NotFoundException("Task not found in this workspace");
+  }
+
+  const subtask = task.subtasks.id(subtaskId);
+  if (!subtask) {
+    throw new NotFoundException("Subtask not found");
+  }
+
+  task.subtasks.pull(subtaskId);
+  await task.save();
+
+  return { message: "Subtask deleted successfully" };
+};

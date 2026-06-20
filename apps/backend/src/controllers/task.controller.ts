@@ -4,6 +4,8 @@ import {
   createTaskSchema,
   taskIdSchema,
   updateTaskSchema,
+  createSubtaskSchema,
+  subtaskIdSchema,
 } from "../validation/task.validation";
 import { projectIdSchema } from "../validation/project.validation";
 import { workspaceIdSchema } from "../validation/workspace.validation";
@@ -16,6 +18,9 @@ import {
   getAllTasksService,
   getTaskByIdService,
   updateTaskService,
+  addSubtaskService,
+  toggleSubtaskService,
+  deleteSubtaskService,
 } from "../services/task.service";
 import { HTTPSTATUS } from "../config/http.config";
 
@@ -148,6 +153,69 @@ export const deleteTaskController = asyncHandler(
 
     return res.status(HTTPSTATUS.OK).json({
       message: "Task deleted successfully",
+    });
+  }
+);
+
+export const addSubtaskController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    const body = createSubtaskSchema.parse(req.body);
+    const taskId = taskIdSchema.parse(req.params.id);
+    const workspaceId = workspaceIdSchema.parse(req.params.workspaceId);
+
+    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.EDIT_TASK]);
+
+    const { subtask } = await addSubtaskService(workspaceId, taskId, body);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Subtask added successfully",
+      subtask,
+    });
+  }
+);
+
+export const toggleSubtaskController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    const taskId = taskIdSchema.parse(req.params.id);
+    const subtaskId = subtaskIdSchema.parse(req.params.subtaskId);
+    const workspaceId = workspaceIdSchema.parse(req.params.workspaceId);
+
+    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.EDIT_TASK]);
+
+    const { subtask } = await toggleSubtaskService(
+      workspaceId,
+      taskId,
+      subtaskId
+    );
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Subtask toggled successfully",
+      subtask,
+    });
+  }
+);
+
+export const deleteSubtaskController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+
+    const taskId = taskIdSchema.parse(req.params.id);
+    const subtaskId = subtaskIdSchema.parse(req.params.subtaskId);
+    const workspaceId = workspaceIdSchema.parse(req.params.workspaceId);
+
+    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.EDIT_TASK]);
+
+    await deleteSubtaskService(workspaceId, taskId, subtaskId);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Subtask deleted successfully",
     });
   }
 );

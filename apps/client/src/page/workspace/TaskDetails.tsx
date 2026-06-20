@@ -15,6 +15,7 @@ import RichContentViewer from "@/components/editor/rich-content-viewer"
 import TaskCommentBox from "@/components/workspace/task/task-comment-box"
 import TaskCommentList from "@/components/workspace/task/task-comment-list"
 import TaskTypeBadge from "@/components/workspace/task/common/task-type-badge"
+import TaskSubtasks from "@/components/workspace/task/task-subtasks"
 
 const priorityStyles: Record<string, string> = {
   HIGH: "destructive-light",
@@ -116,6 +117,15 @@ export default function TaskDetails() {
                 content={task.description || ""}
                 className="text-sm"
               />
+            </CardContent>
+          </Card>
+
+          <Separator />
+
+          {/* Subtasks checklist */}
+          <Card>
+            <CardContent className="pt-6">
+              <TaskSubtasks task={task} workspaceId={workspaceId} />
             </CardContent>
           </Card>
 

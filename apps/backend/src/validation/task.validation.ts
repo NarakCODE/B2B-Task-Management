@@ -60,3 +60,9 @@ export const updateTaskSchema = z.object({
   storyPoints: storyPointsSchema,
   sprint: sprintIdSchema,
 });
+
+export const createSubtaskSchema = z.object({
+  title: titleSchema,
+});
+
+export const subtaskIdSchema = z.string().trim().min(1);
