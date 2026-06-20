@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose"
 import {
   TaskPriorityEnum,
   TaskPriorityEnumType,
@@ -6,32 +6,49 @@ import {
   TaskStatusEnumType,
   TaskTypeEnum,
   TaskTypeEnumType,
-} from "../enums/task.enum";
-import { generateTaskCode } from "../utils/uuid";
+} from "../enums/task.enum"
+import { generateTaskCode } from "../utils/uuid"
 
 export interface SubTaskDocument extends mongoose.Document {
-  title: string;
-  isCompleted: boolean;
-  createdAt: Date;
+  title: string
+  isCompleted: boolean
+  createdAt: Date
+}
+
+export interface TaskDependency {
+  type: "BLOCKED_BY" | "BLOCKS" | "RELATED" | "PARENT" | "CHILD"
+  task: mongoose.Types.ObjectId
+}
+
+export interface TaskAttachment extends mongoose.Document {
+  filename: string
+  url: string
+  publicId: string
+  mimeType: string
+  size: number
+  uploadedBy: mongoose.Types.ObjectId
+  createdAt: Date
 }
 
 export interface TaskDocument extends Document {
-  taskCode: string;
-  title: string;
-  description: string | null;
-  project: mongoose.Types.ObjectId;
-  workspace: mongoose.Types.ObjectId;
-  status: TaskStatusEnumType;
-  priority: TaskPriorityEnumType;
-  taskType: TaskTypeEnumType;
-  storyPoints: number | null;
-  sprint: mongoose.Types.ObjectId | null;
-  assignedTo: mongoose.Types.ObjectId | null;
-  createdBy: mongoose.Types.ObjectId;
-  dueDate: Date | null;
-  subtasks: mongoose.Types.DocumentArray<SubTaskDocument>;
-  createdAt: Date;
-  updatedAt: Date;
+  taskCode: string
+  title: string
+  description: string | null
+  project: mongoose.Types.ObjectId
+  workspace: mongoose.Types.ObjectId
+  status: TaskStatusEnumType
+  priority: TaskPriorityEnumType
+  taskType: TaskTypeEnumType
+  storyPoints: number | null
+  sprint: mongoose.Types.ObjectId | null
+  assignedTo: mongoose.Types.ObjectId | null
+  createdBy: mongoose.Types.ObjectId
+  dueDate: Date | null
+  subtasks: mongoose.Types.DocumentArray<SubTaskDocument>
+  dependencies: TaskDependency[]
+  attachments: mongoose.Types.DocumentArray<TaskAttachment>
+  createdAt: Date
+  updatedAt: Date
 }
 
 const subtaskSchema = new Schema<SubTaskDocument>(
@@ -48,8 +65,38 @@ const subtaskSchema = new Schema<SubTaskDocument>(
   },
   {
     timestamps: { createdAt: true, updatedAt: false },
-  }
-);
+  },
+)
+
+const taskDependencySchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ["BLOCKED_BY", "BLOCKS", "RELATED", "PARENT", "CHILD"],
+      required: true,
+    },
+    task: {
+      type: Schema.Types.ObjectId,
+      ref: "Task",
+      required: true,
+    },
+  },
+  {
+    _id: false,
+  },
+)
+
+const taskAttachmentSchema = new Schema<TaskAttachment>(
+  {
+    filename: { type: String, required: true },
+    url: { type: String, required: true },
+    publicId: { type: String, required: true },
+    mimeType: { type: String, required: true },
+    size: { type: Number, required: true },
+    uploadedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  { timestamps: { createdAt: true, updatedAt: false } },
+)
 
 const taskSchema = new Schema<TaskDocument>(
   {
@@ -120,12 +167,20 @@ const taskSchema = new Schema<TaskDocument>(
       type: [subtaskSchema],
       default: [],
     },
+    dependencies: {
+      type: [taskDependencySchema],
+      default: [],
+    },
+    attachments: {
+      type: [taskAttachmentSchema],
+      default: [],
+    },
   },
   {
     timestamps: true,
-  }
-);
+  },
+)
 
-const TaskModel = mongoose.model<TaskDocument>("Task", taskSchema);
+const TaskModel = mongoose.model<TaskDocument>("Task", taskSchema)
 
-export default TaskModel;
+export default TaskModel
