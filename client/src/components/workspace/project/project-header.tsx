@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 import { useParams } from "react-router-dom";
 import CreateTaskDialog from "../task/create-task-dialog";
 import EditProjectDialog from "./edit-project-dialog";
@@ -52,7 +52,9 @@ const ProjectHeader = () => {
           <EditProjectDialog project={project} />
         </PermissionsGuard>
       </div>
-      <CreateTaskDialog projectId={projectId} />
+      <PermissionsGuard requiredPermission={Permissions.CREATE_TASK}>
+        <CreateTaskDialog projectId={projectId} />
+      </PermissionsGuard>
     </div>
   );
 };

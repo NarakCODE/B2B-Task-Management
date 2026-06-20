@@ -3,8 +3,12 @@ import SignIn from "@/page/auth/Sign-in";
 import SignUp from "@/page/auth/Sign-up";
 import WorkspaceDashboard from "@/page/workspace/Dashboard";
 import Members from "@/page/workspace/Members";
+import Profile from "@/page/workspace/Profile";
 import ProjectDetails from "@/page/workspace/ProjectDetails";
 import Settings from "@/page/workspace/Settings";
+import Integrations from "@/page/workspace/Integrations";
+import Billing from "@/page/workspace/Billing";
+import Roles from "@/page/workspace/Roles";
 import Tasks from "@/page/workspace/Tasks";
 import { AUTH_ROUTES, BASE_ROUTE, PROTECTED_ROUTES } from "./routePaths";
 import InviteUser from "@/page/invite/InviteUser";
@@ -19,6 +23,10 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.WORKSPACE, element: <WorkspaceDashboard /> },
   { path: PROTECTED_ROUTES.TASKS, element: <Tasks /> },
   { path: PROTECTED_ROUTES.MEMBERS, element: <Members /> },
+  { path: PROTECTED_ROUTES.INTEGRATIONS, element: <Integrations /> },
+  { path: PROTECTED_ROUTES.ROLES, element: <Roles /> },
+  { path: PROTECTED_ROUTES.BILLING, element: <Billing /> },
+  { path: PROTECTED_ROUTES.PROFILE, element: <Profile /> },
   { path: PROTECTED_ROUTES.SETTINGS, element: <Settings /> },
   { path: PROTECTED_ROUTES.PROJECT_DETAILS, element: <ProjectDetails /> },
 ];

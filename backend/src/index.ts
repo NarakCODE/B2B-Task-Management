@@ -19,11 +19,25 @@ import workspaceRoutes from "./routes/workspace.route";
 import memberRoutes from "./routes/member.route";
 import projectRoutes from "./routes/project.route";
 import taskRoutes from "./routes/task.route";
+import sprintRoutes from "./routes/sprint.route";
+import commentRoutes from "./routes/comment.route";
+import timeLogRoutes from "./routes/time-log.route";
+import timelineRoutes from "./routes/timeline.route";
+import integrationRoutes from "./routes/integration.route";
+import billingRoutes from "./routes/billing.route";
+
+
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
 
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf.toString();
+    },
+  })
+);
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,6 +51,21 @@ app.use(
     sameSite: "lax",
   })
 );
+
+// Passport session regeneration workaround for cookie-session
+app.use((req, res, next) => {
+  if (req.session && !req.session.regenerate) {
+    (req.session as any).regenerate = (cb: () => void) => {
+      cb();
+    };
+  }
+  if (req.session && !req.session.save) {
+    (req.session as any).save = (cb: () => void) => {
+      cb();
+    };
+  }
+  next();
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -67,6 +96,14 @@ app.use(`${BASE_PATH}/workspace`, isAuthenticated, workspaceRoutes);
 app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 app.use(`${BASE_PATH}/project`, isAuthenticated, projectRoutes);
 app.use(`${BASE_PATH}/task`, isAuthenticated, taskRoutes);
+app.use(`${BASE_PATH}/sprint`, isAuthenticated, sprintRoutes);
+app.use(`${BASE_PATH}/comment`, isAuthenticated, commentRoutes);
+app.use(`${BASE_PATH}/time-log`, isAuthenticated, timeLogRoutes);
+app.use(`${BASE_PATH}/timeline`, isAuthenticated, timelineRoutes);
+app.use(`${BASE_PATH}/integration`, integrationRoutes);
+app.use(`${BASE_PATH}/billing`, billingRoutes);
+
+
 
 app.use(errorHandler);
 

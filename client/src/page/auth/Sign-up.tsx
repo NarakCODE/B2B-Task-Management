@@ -23,7 +23,7 @@ import Logo from "@/components/logo";
 import GoogleOauthButton from "@/components/auth/google-oauth-button";
 import { useMutation } from "@tanstack/react-query";
 import { registerMutationFn } from "@/lib/api";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader } from "lucide-react";
 
 const SignUp = () => {
@@ -61,11 +61,7 @@ const SignUp = () => {
       },
       onError: (error) => {
         console.log(error);
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast.error(error.message);
       },
     });
   };

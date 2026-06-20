@@ -13,9 +13,6 @@ const seedRoles = async () => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    console.log("Clearing existing roles...");
-    await RoleModel.deleteMany({}, { session });
-
     for (const roleName in RolePermissions) {
       const role = roleName as keyof typeof RolePermissions;
       const permissions = RolePermissions[role];
@@ -32,7 +29,9 @@ const seedRoles = async () => {
         await newRole.save({ session });
         console.log(`Role ${role} added with permissions.`);
       } else {
-        console.log(`Role ${role} already exists.`);
+        existingRole.permissions = permissions;
+        await existingRole.save({ session });
+        console.log(`Role ${role} already exists. Updated permissions.`);
       }
     }
 
@@ -45,6 +44,8 @@ const seedRoles = async () => {
     console.log("Seeding completed successfully.");
   } catch (error) {
     console.error("Error during seeding:", error);
+  } finally {
+    mongoose.connection.close();
   }
 };
 

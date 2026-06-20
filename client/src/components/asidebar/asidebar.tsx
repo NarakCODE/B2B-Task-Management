@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { EllipsisIcon, Loader, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { EllipsisIcon, Loader, LogOut, User } from "lucide-react";
 import {
   Sidebar,
   SidebarHeader,
@@ -12,8 +12,8 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,29 +35,28 @@ import { useAuthContext } from "@/context/auth-provider";
 const Asidebar = () => {
   const { isLoading, user } = useAuthContext();
 
-  const { open } = useSidebar();
   const workspaceId = useWorkspaceId();
+  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="!py-0 dark:bg-background">
-          <div className="flex h-[50px] items-center justify-start w-full px-1">
+        <TooltipProvider delayDuration={0}>
+        <SidebarHeader>
+          <div className="flex h-12 items-center justify-start w-full px-1">
             <Logo url={`/workspace/${workspaceId}`} />
-            {open && (
-              <Link
-                to={`/workspace/${workspaceId}`}
-                className="hidden md:flex ml-2 items-center gap-2 self-center font-medium"
-              >
-                Team Sync.
-              </Link>
-            )}
+            <Link
+              to={`/workspace/${workspaceId}`}
+              className="hidden md:flex ml-2 items-center gap-2 self-center font-medium group-data-[collapsible=icon]:hidden"
+            >
+              Team Sync.
+            </Link>
           </div>
         </SidebarHeader>
-        <SidebarContent className=" !mt-0 dark:bg-background">
-          <SidebarGroup className="!py-0">
+        <SidebarContent>
+          <SidebarGroup>
             <SidebarGroupContent>
               <WorkspaceSwitcher />
               <Separator />
@@ -67,7 +66,7 @@ const Asidebar = () => {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter className="dark:bg-background">
+        <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
               {isLoading ? (
@@ -104,7 +103,15 @@ const Asidebar = () => {
                     align="start"
                     sideOffset={4}
                   >
-                    <DropdownMenuGroup></DropdownMenuGroup>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/workspace/${workspaceId}/profile`)}
+                      >
+                        <User />
+                        Profile
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setIsOpen(true)}>
                       <LogOut />
@@ -116,6 +123,7 @@ const Asidebar = () => {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
+        </TooltipProvider>
         <SidebarRail />
       </Sidebar>
 

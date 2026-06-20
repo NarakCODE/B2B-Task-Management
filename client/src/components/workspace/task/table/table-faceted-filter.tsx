@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from "react";
 import { Check, PlusCircle } from "lucide-react";
 
@@ -24,9 +23,9 @@ import { Separator } from "@/components/ui/separator";
 interface DataTableFacetedFilterProps {
   title?: string;
   options: {
-    label: string | JSX.Element;
+    label: string | React.JSX.Element;
     value: string;
-    icon?: React.ComponentType<{ className?: string }> | any;
+    icon?: React.ComponentType<{ className?: string }>;  
   }[];
   disabled?: boolean;
   multiSelect?: boolean;

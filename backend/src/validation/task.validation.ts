@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TaskPriorityEnum, TaskStatusEnum } from "../enums/task.enum";
+import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "../enums/task.enum";
 
 export const titleSchema = z.string().trim().min(1).max(255);
 export const descriptionSchema = z.string().trim().optional();
@@ -13,6 +13,14 @@ export const prioritySchema = z.enum(
 export const statusSchema = z.enum(
   Object.values(TaskStatusEnum) as [string, ...string[]]
 );
+
+export const taskTypeSchema = z.enum(
+  Object.values(TaskTypeEnum) as [string, ...string[]]
+).optional();
+
+export const storyPointsSchema = z.number().int().min(0).nullable().optional();
+
+export const sprintIdSchema = z.string().trim().min(1).nullable().optional();
 
 export const dueDateSchema = z
   .string()
@@ -36,6 +44,9 @@ export const createTaskSchema = z.object({
   status: statusSchema,
   assignedTo: assignedToSchema,
   dueDate: dueDateSchema,
+  taskType: taskTypeSchema,
+  storyPoints: storyPointsSchema,
+  sprint: sprintIdSchema,
 });
 
 export const updateTaskSchema = z.object({
@@ -45,4 +56,7 @@ export const updateTaskSchema = z.object({
   status: statusSchema,
   assignedTo: assignedToSchema,
   dueDate: dueDateSchema,
+  taskType: taskTypeSchema,
+  storyPoints: storyPointsSchema,
+  sprint: sprintIdSchema,
 });

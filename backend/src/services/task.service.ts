@@ -1,7 +1,9 @@
-import { TaskPriorityEnum, TaskStatusEnum } from "../enums/task.enum";
+import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "../enums/task.enum";
 import MemberModel from "../models/member.model";
 import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
+import SprintModel from "../models/sprint.model";
+import { logActivity } from "./activity-log.service";
 import { BadRequestException, NotFoundException } from "../utils/appError";
 
 export const createTaskService = async (
@@ -15,9 +17,12 @@ export const createTaskService = async (
     status: string;
     assignedTo?: string | null;
     dueDate?: string;
+    taskType?: string;
+    storyPoints?: number | null;
+    sprint?: string | null;
   }
 ) => {
-  const { title, description, priority, status, assignedTo, dueDate } = body;
+  const { title, description, priority, status, assignedTo, dueDate, taskType, storyPoints, sprint } = body;
 
   const project = await ProjectModel.findById(projectId);
 
@@ -36,11 +41,22 @@ export const createTaskService = async (
       throw new Error("Assigned user is not a member of this workspace.");
     }
   }
+
+  if (sprint) {
+    const existingSprint = await SprintModel.findById(sprint);
+    if (!existingSprint || existingSprint.project.toString() !== projectId.toString()) {
+      throw new NotFoundException("Sprint not found or does not belong to this project.");
+    }
+  }
+
   const task = new TaskModel({
     title,
     description,
     priority: priority || TaskPriorityEnum.MEDIUM,
     status: status || TaskStatusEnum.TODO,
+    taskType: taskType || TaskTypeEnum.FEATURE,
+    storyPoints: storyPoints !== undefined ? storyPoints : null,
+    sprint: sprint || null,
     assignedTo,
     createdBy: userId,
     workspace: workspaceId,
@@ -50,6 +66,16 @@ export const createTaskService = async (
 
   await task.save();
 
+  await logActivity({
+    workspaceId,
+    projectId,
+    sprintId: sprint || null,
+    taskId: task._id.toString(),
+    userId,
+    actionType: "CREATE_TASK",
+    description: `created task "${title}"`,
+  });
+
   return { task };
 };
 
@@ -57,6 +83,7 @@ export const updateTaskService = async (
   workspaceId: string,
   projectId: string,
   taskId: string,
+  userId: string,
   body: {
     title: string;
     description?: string;
@@ -64,6 +91,9 @@ export const updateTaskService = async (
     status: string;
     assignedTo?: string | null;
     dueDate?: string;
+    taskType?: string;
+    storyPoints?: number | null;
+    sprint?: string | null;
   }
 ) => {
   const project = await ProjectModel.findById(projectId);
@@ -80,6 +110,40 @@ export const updateTaskService = async (
     throw new NotFoundException(
       "Task not found or does not belong to this project"
     );
+  }
+
+  if (body.sprint) {
+    const existingSprint = await SprintModel.findById(body.sprint);
+    if (!existingSprint || existingSprint.project.toString() !== projectId.toString()) {
+      throw new NotFoundException("Sprint not found or does not belong to this project.");
+    }
+  }
+
+  // Log activity if status or priority changed
+  if (body.status && body.status !== task.status) {
+    await logActivity({
+      workspaceId,
+      projectId,
+      sprintId: task.sprint?.toString() || null,
+      taskId: task._id.toString(),
+      userId,
+      actionType: "UPDATE_TASK_STATUS",
+      metadata: { oldStatus: task.status, newStatus: body.status },
+      description: `changed status of task "${task.title}" to ${body.status}`,
+    });
+  }
+
+  if (body.priority && body.priority !== task.priority) {
+    await logActivity({
+      workspaceId,
+      projectId,
+      sprintId: task.sprint?.toString() || null,
+      taskId: task._id.toString(),
+      userId,
+      actionType: "UPDATE_TASK_PRIORITY",
+      metadata: { oldPriority: task.priority, newPriority: body.priority },
+      description: `changed priority of task "${task.title}" to ${body.priority}`,
+    });
   }
 
   const updatedTask = await TaskModel.findByIdAndUpdate(
@@ -106,6 +170,8 @@ export const getAllTasksService = async (
     assignedTo?: string[];
     keyword?: string;
     dueDate?: string;
+    sprint?: string;
+    taskType?: string[];
   },
   pagination: {
     pageSize: number;
@@ -142,6 +208,18 @@ export const getAllTasksService = async (
     };
   }
 
+  if (filters.sprint) {
+    if (filters.sprint === "backlog") {
+      query.sprint = null;
+    } else {
+      query.sprint = filters.sprint;
+    }
+  }
+
+  if (filters.taskType && filters.taskType.length > 0) {
+    query.taskType = { $in: filters.taskType };
+  }
+
   //Pagination Setup
   const { pageSize, pageNumber } = pagination;
   const skip = (pageNumber - 1) * pageSize;
@@ -152,7 +230,8 @@ export const getAllTasksService = async (
       .limit(pageSize)
       .sort({ createdAt: -1 })
       .populate("assignedTo", "_id name profilePicture -password")
-      .populate("project", "_id emoji name"),
+      .populate("project", "_id emoji name")
+      .populate("sprint", "_id name status startDate endDate"),
     TaskModel.countDocuments(query),
   ]);
 
@@ -187,7 +266,9 @@ export const getTaskByIdService = async (
     _id: taskId,
     workspace: workspaceId,
     project: projectId,
-  }).populate("assignedTo", "_id name profilePicture -password");
+  })
+    .populate("assignedTo", "_id name profilePicture -password")
+    .populate("sprint", "_id name status startDate endDate");
 
   if (!task) {
     throw new NotFoundException("Task not found.");

@@ -14,6 +14,16 @@ import {
   EditProjectPayloadType,
   ProjectByIdPayloadType,
   ProjectResponseType,
+  SprintType,
+  CreateSprintPayloadType,
+  UpdateSprintPayloadType,
+  CommentType,
+  CreateCommentPayloadType,
+  UpdateCommentPayloadType,
+  TimeLogType,
+  LogTimePayloadType,
+  TaskType,
+  ActivityLogType,
 } from "../types/api.type";
 import {
   AllWorkspaceResponseType,
@@ -24,6 +34,10 @@ import {
   registerType,
   WorkspaceByIdResponseType,
   EditWorkspaceType,
+  WorkspaceRolesResponseType,
+  UpdateRolePermissionsPayloadType,
+  UpdateRolePermissionsResponseType,
+  UserType,
 } from "@/types/api.type";
 
 export const loginMutationFn = async (
@@ -43,6 +57,14 @@ export const getCurrentUserQueryFn =
     const response = await API.get(`/user/current`);
     return response.data;
   };
+
+export const updateProfileMutationFn = async (data: {
+  name?: string;
+  profilePicture?: string | null;
+}): Promise<{ message: string; user: UserType }> => {
+  const response = await API.put(`/user/update`, data);
+  return response.data;
+};
 
 //********* WORKSPACE ****************
 //************* */
@@ -107,6 +129,25 @@ export const deleteWorkspaceMutationFn = async (
   currentWorkspace: string;
 }> => {
   const response = await API.delete(`/workspace/delete/${workspaceId}`);
+  return response.data;
+};
+
+export const getWorkspaceRolesQueryFn = async (
+  workspaceId: string
+): Promise<WorkspaceRolesResponseType> => {
+  const response = await API.get(`/workspace/roles/${workspaceId}`);
+  return response.data;
+};
+
+export const updateRolePermissionsMutationFn = async ({
+  workspaceId,
+  roleId,
+  data,
+}: UpdateRolePermissionsPayloadType): Promise<UpdateRolePermissionsResponseType> => {
+  const response = await API.put(
+    `/workspace/${workspaceId}/role/${roleId}/permissions`,
+    data
+  );
   return response.data;
 };
 
@@ -259,5 +300,341 @@ export const deleteTaskMutationFn = async ({
   const response = await API.delete(
     `task/${taskId}/workspace/${workspaceId}/delete`
   );
+  return response.data;
+};
+
+// ==========================================
+// SPRINTS API FUNCTIONS
+// ==========================================
+
+export const createSprintMutationFn = async ({
+  workspaceId,
+  projectId,
+  data,
+}: CreateSprintPayloadType): Promise<{
+  message: string;
+  sprint: SprintType;
+}> => {
+  const response = await API.post(
+    `/sprint/project/${projectId}/workspace/${workspaceId}/create`,
+    data
+  );
+  return response.data;
+};
+
+export const updateSprintMutationFn = async ({
+  workspaceId,
+  projectId,
+  sprintId,
+  data,
+}: UpdateSprintPayloadType): Promise<{
+  message: string;
+  sprint: SprintType;
+}> => {
+  const response = await API.put(
+    `/sprint/${sprintId}/project/${projectId}/workspace/${workspaceId}/update`,
+    data
+  );
+  return response.data;
+};
+
+export const getProjectSprintsQueryFn = async ({
+  workspaceId,
+  projectId,
+}: ProjectByIdPayloadType): Promise<{
+  message: string;
+  sprints: SprintType[];
+}> => {
+  const response = await API.get(
+    `/sprint/project/${projectId}/workspace/${workspaceId}/all`
+  );
+  return response.data;
+};
+
+export const getSprintByIdQueryFn = async ({
+  workspaceId,
+  projectId,
+  sprintId,
+}: {
+  workspaceId: string;
+  projectId: string;
+  sprintId: string;
+}): Promise<{
+  message: string;
+  sprint: SprintType;
+  tasks: TaskType[];
+  stats: {
+    totalTasks: number;
+    completedTasks: number;
+    totalStoryPoints: number;
+    completedStoryPoints: number;
+  };
+}> => {
+  const response = await API.get(
+    `/sprint/${sprintId}/project/${projectId}/workspace/${workspaceId}`
+  );
+  return response.data;
+};
+
+export const deleteSprintMutationFn = async ({
+  workspaceId,
+  sprintId,
+}: {
+  workspaceId: string;
+  sprintId: string;
+}): Promise<{
+  message: string;
+}> => {
+  const response = await API.delete(
+    `/sprint/${sprintId}/workspace/${workspaceId}/delete`
+  );
+  return response.data;
+};
+
+// ==========================================
+// COMMENTS API FUNCTIONS
+// ==========================================
+
+export const createCommentMutationFn = async ({
+  workspaceId,
+  taskId,
+  data,
+}: CreateCommentPayloadType): Promise<{
+  message: string;
+  comment: CommentType;
+}> => {
+  const response = await API.post(
+    `/comment/task/${taskId}/workspace/${workspaceId}/create`,
+    data
+  );
+  return response.data;
+};
+
+export const getTaskCommentsQueryFn = async ({
+  workspaceId,
+  taskId,
+}: {
+  workspaceId: string;
+  taskId: string;
+}): Promise<{
+  message: string;
+  comments: CommentType[];
+}> => {
+  const response = await API.get(
+    `/comment/task/${taskId}/workspace/${workspaceId}/all`
+  );
+  return response.data;
+};
+
+export const updateCommentMutationFn = async ({
+  workspaceId,
+  commentId,
+  data,
+}: UpdateCommentPayloadType): Promise<{
+  message: string;
+  comment: CommentType;
+}> => {
+  const response = await API.put(
+    `/comment/${commentId}/workspace/${workspaceId}/update`,
+    data
+  );
+  return response.data;
+};
+
+export const deleteCommentMutationFn = async ({
+  workspaceId,
+  commentId,
+}: {
+  workspaceId: string;
+  commentId: string;
+}): Promise<{
+  message: string;
+}> => {
+  const response = await API.delete(
+    `/comment/${commentId}/workspace/${workspaceId}/delete`
+  );
+  return response.data;
+};
+
+// ==========================================
+// TIME LOGS API FUNCTIONS
+// ==========================================
+
+export const logTimeMutationFn = async ({
+  workspaceId,
+  taskId,
+  data,
+}: LogTimePayloadType): Promise<{
+  message: string;
+  timeLog: TimeLogType;
+}> => {
+  const response = await API.post(
+    `/time-log/task/${taskId}/workspace/${workspaceId}/create`,
+    data
+  );
+  return response.data;
+};
+
+export const getTaskTimeLogsQueryFn = async ({
+  workspaceId,
+  taskId,
+}: {
+  workspaceId: string;
+  taskId: string;
+}): Promise<{
+  message: string;
+  timeLogs: TimeLogType[];
+  totalMinutes: number;
+}> => {
+  const response = await API.get(
+    `/time-log/task/${taskId}/workspace/${workspaceId}/all`
+  );
+  return response.data;
+};
+
+export const getProjectTimeLogsQueryFn = async ({
+  workspaceId,
+  projectId,
+}: {
+  workspaceId: string;
+  projectId: string;
+}): Promise<{
+  message: string;
+  timeLogs: TimeLogType[];
+  totalMinutes: number;
+}> => {
+  const response = await API.get(
+    `/time-log/project/${projectId}/workspace/${workspaceId}/all`
+  );
+  return response.data;
+};
+
+export const deleteTimeLogMutationFn = async ({
+  workspaceId,
+  timeLogId,
+}: {
+  workspaceId: string;
+  timeLogId: string;
+}): Promise<{
+  message: string;
+}> => {
+  const response = await API.delete(
+    `/time-log/${timeLogId}/workspace/${workspaceId}/delete`
+  );
+  return response.data;
+};
+
+// ==========================================
+// TIMELINE API FUNCTIONS
+// ==========================================
+
+export const getWorkspaceTimelineQueryFn = async ({
+  workspaceId,
+}: {
+  workspaceId: string;
+}): Promise<{
+  message: string;
+  logs: ActivityLogType[];
+}> => {
+  const response = await API.get(`/timeline/workspace/${workspaceId}`);
+  return response.data;
+};
+
+export const getProjectTimelineQueryFn = async ({
+  workspaceId,
+  projectId,
+}: {
+  workspaceId: string;
+  projectId: string;
+}): Promise<{
+  message: string;
+  logs: ActivityLogType[];
+}> => {
+  const response = await API.get(
+    `/timeline/project/${projectId}/workspace/${workspaceId}`
+  );
+  return response.data;
+};
+
+export const getSprintTimelineQueryFn = async ({
+  workspaceId,
+  sprintId,
+}: {
+  workspaceId: string;
+  sprintId: string;
+}): Promise<{
+  message: string;
+  logs: ActivityLogType[];
+}> => {
+  const response = await API.get(
+    `/timeline/sprint/${sprintId}/workspace/${workspaceId}`
+  );
+  return response.data;
+};
+
+export interface IntegrationType {
+  _id: string;
+  workspace: string;
+  provider: "GITHUB" | "SLACK";
+  webhookUrl?: string;
+  secret?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getWorkspaceIntegrationsQueryFn = async (
+  workspaceId: string
+): Promise<{ message: string; integrations: IntegrationType[] }> => {
+  const response = await API.get(`/integration/workspace/${workspaceId}`);
+  return response.data;
+};
+
+export const createOrUpdateIntegrationMutationFn = async ({
+  workspaceId,
+  data,
+}: {
+  workspaceId: string;
+  data: {
+    provider: "GITHUB" | "SLACK";
+    webhookUrl?: string;
+    secret?: string;
+    isActive?: boolean;
+  };
+}): Promise<{ message: string; integration: IntegrationType }> => {
+  const response = await API.post(`/integration/workspace/${workspaceId}`, data);
+  return response.data;
+};
+
+export interface SubscriptionType {
+  _id: string;
+  workspace: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId?: string;
+  plan: "FREE" | "PRO" | "ENTERPRISE";
+  status: string;
+  currentPeriodEnd?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const getWorkspaceSubscriptionQueryFn = async (
+  workspaceId: string
+): Promise<{ message: string; subscription: SubscriptionType }> => {
+  const response = await API.get(`/billing/subscription/${workspaceId}`);
+  return response.data;
+};
+
+export const createCheckoutSessionMutationFn = async (
+  workspaceId: string
+): Promise<{ message: string; url: string }> => {
+  const response = await API.post(`/billing/checkout/${workspaceId}`);
+  return response.data;
+};
+
+export const createPortalSessionMutationFn = async (
+  workspaceId: string
+): Promise<{ message: string; url: string }> => {
+  const response = await API.post(`/billing/portal/${workspaceId}`);
   return response.data;
 };

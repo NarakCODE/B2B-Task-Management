@@ -7,6 +7,8 @@ import {
   getWorkspaceAnalyticsController,
   getWorkspaceByIdController,
   getWorkspaceMembersController,
+  getWorkspaceRolesController,
+  updateRolePermissionsController,
   updateWorkspaceByIdController,
 } from "../controllers/workspace.controller";
 
@@ -26,6 +28,8 @@ workspaceRoutes.get("/all", getAllWorkspacesUserIsMemberController);
 
 workspaceRoutes.get("/members/:id", getWorkspaceMembersController);
 workspaceRoutes.get("/analytics/:id", getWorkspaceAnalyticsController);
+workspaceRoutes.get("/roles/:id", getWorkspaceRolesController);
+workspaceRoutes.put("/:id/role/:roleId/permissions", updateRolePermissionsController);
 
 workspaceRoutes.get("/:id", getWorkspaceByIdController);
 

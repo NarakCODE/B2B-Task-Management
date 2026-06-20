@@ -16,6 +16,7 @@ import useGetProjectsInWorkspaceQuery from "@/hooks/api/use-get-projects";
 import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members";
 import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetProjectSprintsQuery } from "@/hooks/api/use-get-sprints";
 
 type Filters = ReturnType<typeof useTaskTableFilter>[0];
 type SetFilters = ReturnType<typeof useTaskTableFilter>[1];
@@ -55,6 +56,8 @@ const TaskTable = () => {
         status: filters.status,
         projectId: projectId || filters.projectId,
         assignedTo: filters.assigneeId,
+        sprint: filters.sprint,
+        taskType: filters.taskType,
         pageNumber,
         pageSize,
       }),
@@ -113,6 +116,12 @@ const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
 
   const { data: memberData } = useGetWorkspaceMembers(workspaceId);
 
+  const { data: sprintsData } = useGetProjectSprintsQuery({
+    workspaceId,
+    projectId: projectId || "",
+    enabled: !!projectId,
+  });
+
   const projects = data?.projects || [];
   const members = memberData?.members || [];
 
@@ -148,6 +157,14 @@ const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
       value: member.userId._id,
     };
   });
+
+  const sprintOptions = [
+    { label: "Backlog", value: "backlog" },
+    ...(sprintsData?.sprints?.map((sprint) => ({
+      label: `${sprint.name} (${sprint.status.toLowerCase()})`,
+      value: sprint._id,
+    })) || []),
+  ];
 
   const handleFilterChange = (key: keyof Filters, values: string[]) => {
     setFilters({
@@ -188,6 +205,33 @@ const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
         onFilterChange={(values) => handleFilterChange("priority", values)}
       />
 
+      {/* Task Type filter */}
+      <DataTableFacetedFilter
+        title="Type"
+        multiSelect={true}
+        options={[
+          { label: "Feature", value: "FEATURE" },
+          { label: "Bug", value: "BUG" },
+          { label: "Chore", value: "CHORE" },
+          { label: "Refactor", value: "REFACTOR" },
+        ]}
+        disabled={isLoading}
+        selectedValues={filters.taskType?.split(",") || []}
+        onFilterChange={(values) => handleFilterChange("taskType", values)}
+      />
+
+      {/* Sprint filter (project only) */}
+      {projectId && (
+        <DataTableFacetedFilter
+          title="Sprint"
+          multiSelect={false}
+          options={sprintOptions}
+          disabled={isLoading}
+          selectedValues={filters.sprint ? [filters.sprint] : []}
+          onFilterChange={(values) => handleFilterChange("sprint", values)}
+        />
+      )}
+
       {/* Assigned To filter */}
       <DataTableFacetedFilter
         title="Assigned To"
@@ -223,6 +267,8 @@ const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
               priority: null,
               projectId: null,
               assigneeId: null,
+              sprint: null,
+              taskType: null,
             })
           }
         >

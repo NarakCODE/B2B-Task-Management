@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthContext } from "@/context/auth-provider";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { CheckIcon, CopyIcon, Loader } from "lucide-react";
 import { BASE_ROUTE } from "@/routes/common/routePaths";
 import PermissionsGuard from "@/components/resuable/permission-guard";
@@ -24,11 +24,7 @@ const InviteMember = () => {
     if (inviteUrl) {
       navigator.clipboard.writeText(inviteUrl).then(() => {
         setCopied(true);
-        toast({
-          title: "Copied",
-          description: "Invite url copied to clipboard",
-          variant: "success",
-        });
+    toast.success("Invite url copied to clipboard");
         setTimeout(() => setCopied(false), 2000);
       });
     }

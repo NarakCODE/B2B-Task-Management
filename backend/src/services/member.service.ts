@@ -8,6 +8,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "../utils/appError";
+import { checkMemberLimit } from "../utils/planGuard";
 
 export const getMemberRoleInWorkspace = async (
   userId: string,
@@ -54,6 +55,9 @@ export const joinWorkspaceByInviteService = async (
   if (existingMember) {
     throw new BadRequestException("You are already a member of this workspace");
   }
+
+  // Enforce seat limit check
+  await checkMemberLimit(workspace._id.toString());
 
   const role = await RoleModel.findOne({ name: Roles.MEMBER });
 

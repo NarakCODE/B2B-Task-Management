@@ -3,6 +3,7 @@ import ProjectModel from "../models/project.model";
 import TaskModel from "../models/task.model";
 import { NotFoundException } from "../utils/appError";
 import { TaskStatusEnum } from "../enums/task.enum";
+import { checkProjectLimit } from "../utils/planGuard";
 
 export const createProjectService = async (
   userId: string,
@@ -13,6 +14,8 @@ export const createProjectService = async (
     description?: string;
   }
 ) => {
+  await checkProjectLimit(workspaceId);
+
   const project = new ProjectModel({
     ...(body.emoji && { emoji: body.emoji }),
     name: body.name,

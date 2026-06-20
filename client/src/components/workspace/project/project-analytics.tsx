@@ -30,6 +30,7 @@ const ProjectAnalytics = () => {
         isLoading={isPending}
         title="Overdue Task"
         value={analytics?.overdueTasks || 0}
+        trend={analytics && analytics.overdueTasks > 0 ? "down" : "up"}
       />
       <AnalyticsCard
         isLoading={isPending}

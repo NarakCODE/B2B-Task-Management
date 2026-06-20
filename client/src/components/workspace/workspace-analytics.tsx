@@ -16,7 +16,7 @@ const WorkspaceAnalytics = () => {
   const analytics = data?.analytics;
 
   return (
-    <div className="grid gap-4 md:gap-5 lg:grid-cols-2 xl:grid-cols-3">
+    <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
       <AnalyticsCard
         isLoading={isPending}
         title="Total Task"
@@ -26,13 +26,14 @@ const WorkspaceAnalytics = () => {
         isLoading={isPending}
         title="Overdue Task"
         value={analytics?.overdueTasks || 0}
+        trend={analytics && analytics.overdueTasks > 0 ? "down" : "up"}
       />
       <AnalyticsCard
         isLoading={isPending}
         title="Completed Task"
         value={analytics?.completedTasks || 0}
       />
-    </div>
+    </dl>
   );
 };
 

@@ -4,6 +4,7 @@ import { z } from "zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,7 +24,7 @@ import { useNavigate } from "react-router-dom";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProjectMutationFn } from "@/lib/api";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Loader } from "lucide-react";
 
 export default function CreateProjectForm({
@@ -76,116 +77,93 @@ export default function CreateProjectForm({
           queryKey: ["allprojects", workspaceId],
         });
 
-        toast({
-          title: "Success",
-          description: "Project created successfully",
-          variant: "success",
-        });
+        toast.success("Project created successfully");
 
         navigate(`/workspace/${workspaceId}/project/${project._id}`);
         setTimeout(() => onClose(), 500);
       },
       onError: (error) => {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast.error(error.message);
       },
     });
   };
 
   return (
-    <div className="w-full h-auto max-w-full">
-      <div className="h-full">
-        <div className="mb-5 pb-2 border-b">
-          <h1
-            className="text-xl tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1
-           text-center sm:text-left"
-          >
-            Create Project
-          </h1>
-          <p className="text-muted-foreground text-sm leading-tight">
-            Organize and manage tasks, resources, and team collaboration
-          </p>
-        </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Select Emoji
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="font-normal size-[60px] !p-2 !shadow-none mt-2 items-center rounded-full "
-                  >
-                    <span className="text-4xl">{emoji}</span>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className=" !p-0">
-                  <EmojiPickerComponent onSelectEmoji={handleEmojiSelection} />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="mb-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                      Project title
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Website Redesign"
-                        className="!h-[48px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="mb-4">
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                      Project description
-                      <span className="text-xs font-extralight ml-2">
-                        Optional
-                      </span>
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        rows={4}
-                        placeholder="Projects description"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
+    <div className="flex flex-col gap-5">
+      <div className="pb-3 border-b">
+        <h1 className="text-xl font-semibold tracking-tight">
+          Create Project
+        </h1>
+        <p className="text-muted-foreground text-sm leading-tight mt-1">
+          Organize and manage tasks, resources, and team collaboration
+        </p>
+      </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <FormItem>
+            <FormLabel className="text-sm">Select Emoji</FormLabel>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="size-14 rounded-full !p-2 !shadow-none text-3xl"
+                >
+                  {emoji}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="!p-0">
+                <EmojiPickerComponent onSelectEmoji={handleEmojiSelection} />
+              </PopoverContent>
+            </Popover>
+          </FormItem>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Project title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Website Redesign" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">
+                  Project description
+                  <span className="text-xs font-extralight ml-2">Optional</span>
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={4}
+                    placeholder="Projects description"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Describe the goals and scope of this project.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="flex justify-end">
             <Button
               disabled={isPending}
-              className="flex place-self-end  h-[40px] text-white font-semibold"
+              className="text-white font-semibold"
               type="submit"
             >
               {isPending && <Loader className="animate-spin" />}
               Create
             </Button>
-          </form>
-        </Form>
-      </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }

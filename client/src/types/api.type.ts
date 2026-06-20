@@ -2,6 +2,7 @@ import {
   PermissionType,
   TaskPriorityEnumType,
   TaskStatusEnumType,
+  TaskTypeEnumType,
 } from "@/constant";
 
 export type loginType = { email: string; password: string };
@@ -146,6 +147,32 @@ export type RoleType = {
   _id: string;
   name: string;
 };
+
+export type WorkspaceRoleType = {
+  _id: string;
+  name: string;
+  permissions: PermissionType[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type WorkspaceRolesResponseType = {
+  message: string;
+  roles: WorkspaceRoleType[];
+};
+
+export type UpdateRolePermissionsPayloadType = {
+  workspaceId: string;
+  roleId: string;
+  data: {
+    permissions: PermissionType[];
+  };
+};
+
+export type UpdateRolePermissionsResponseType = {
+  message: string;
+  role: WorkspaceRoleType;
+};
 // *********** MEMBER ****************
 
 //******** */ PROJECT TYPES ****************
@@ -218,11 +245,14 @@ export type CreateTaskPayloadType = {
   projectId: string;
   data: {
     title: string;
-    description: string;
+    description?: string;
     priority: TaskPriorityEnumType;
     status: TaskStatusEnumType;
-    assignedTo: string;
-    dueDate: string;
+    assignedTo?: string | null;
+    dueDate?: string;
+    taskType?: TaskTypeEnumType;
+    storyPoints?: number | null;
+    sprint?: string | null;
   };
 };
 
@@ -237,8 +267,11 @@ export type EditTaskPayloadType = {
     description: string;
     priority: TaskPriorityEnumType;
     status: TaskStatusEnumType;
-    assignedTo: string;
+    assignedTo: string | null;
     dueDate: string;
+    taskType: TaskTypeEnumType;
+    storyPoints: number | null;
+    sprint: string | null;
   }>;
 };
 
@@ -254,6 +287,15 @@ export type TaskType = {
   };
   priority: TaskPriorityEnumType;
   status: TaskStatusEnumType;
+  taskType: TaskTypeEnumType;
+  storyPoints: number | null;
+  sprint: {
+    _id: string;
+    name: string;
+    status: "PLANNED" | "ACTIVE" | "COMPLETED";
+    startDate: string;
+    endDate: string;
+  } | null;
   assignedTo: {
     _id: string;
     name: string;
@@ -274,6 +316,8 @@ export type AllTaskPayloadType = {
   status?: TaskStatusEnumType | null;
   assignedTo?: string | null;
   dueDate?: string | null;
+  sprint?: string | null;
+  taskType?: TaskTypeEnumType[] | string | null;
   pageNumber?: number | null;
   pageSize?: number | null;
 };
@@ -282,4 +326,142 @@ export type AllTaskResponseType = {
   message: string;
   tasks: TaskType[];
   pagination: PaginationType;
+};
+
+// ==========================================
+// Sprints
+// ==========================================
+export type SprintStatusType = "PLANNED" | "ACTIVE" | "COMPLETED";
+
+export type SprintType = {
+  _id: string;
+  name: string;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  status: SprintStatusType;
+  project: string;
+  workspace: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateSprintPayloadType = {
+  workspaceId: string;
+  projectId: string;
+  data: {
+    name: string;
+    description?: string;
+    startDate: string;
+    endDate: string;
+  };
+};
+
+export type UpdateSprintPayloadType = {
+  workspaceId: string;
+  projectId: string;
+  sprintId: string;
+  data: Partial<{
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    status: SprintStatusType;
+  }>;
+};
+
+// ==========================================
+// Comments
+// ==========================================
+export type CommentType = {
+  _id: string;
+  content: string;
+  task: string;
+  user: {
+    _id: string;
+    name: string;
+    profilePicture: string | null;
+  };
+  workspace: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CreateCommentPayloadType = {
+  workspaceId: string;
+  taskId: string;
+  data: {
+    content: string;
+  };
+};
+
+export type UpdateCommentPayloadType = {
+  workspaceId: string;
+  commentId: string;
+  data: {
+    content: string;
+  };
+};
+
+// ==========================================
+// Time Logs
+// ==========================================
+export type TimeLogType = {
+  _id: string;
+  task: string | { _id: string; title: string; taskCode: string };
+  user: {
+    _id: string;
+    name: string;
+    profilePicture: string | null;
+  };
+  workspace: string;
+  durationMinutes: number;
+  description: string | null;
+  loggedAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LogTimePayloadType = {
+  workspaceId: string;
+  taskId: string;
+  data: {
+    durationMinutes: number;
+    description?: string;
+    loggedAt?: string;
+  };
+};
+
+// ==========================================
+// Timeline / Activity Logs
+// ==========================================
+export type ActivityLogType = {
+  _id: string;
+  workspace: string;
+  project?: {
+    _id: string;
+    name: string;
+    emoji: string;
+  } | null;
+  sprint?: {
+    _id: string;
+    name: string;
+    status: string;
+  } | null;
+  task?: {
+    _id: string;
+    title: string;
+    taskCode: string;
+  } | null;
+  user: {
+    _id: string;
+    name: string;
+    profilePicture: string | null;
+  };
+  actionType: string;
+  description: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
 };

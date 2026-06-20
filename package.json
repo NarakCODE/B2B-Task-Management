@@ -1,0 +1,16 @@
+{
+  "name": "project-root",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "lint-staged": {
+    "client/src/**/*.{js,jsx,ts,tsx}": [
+      "npx --prefix client eslint --fix"
+    ]
+  }
+}

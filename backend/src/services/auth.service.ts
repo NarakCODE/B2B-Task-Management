@@ -10,10 +10,10 @@ import {
   UnauthorizedException,
 } from "../utils/appError";
 import MemberModel from "../models/member.model";
-import { ProviderEnum } from "../enums/account-provider.enum";
+import { ProviderEnum, ProviderEnumType } from "../enums/account-provider.enum";
 
 export const loginOrCreateAccountService = async (data: {
-  provider: string;
+  provider: ProviderEnumType;
   displayName: string;
   providerId: string;
   picture?: string;
@@ -162,11 +162,11 @@ export const registerUserService = async (body: {
 export const verifyUserService = async ({
   email,
   password,
-  provider = ProviderEnum.EMAIL,
+  provider = ProviderEnum.EMAIL as ProviderEnumType,
 }: {
   email: string;
   password: string;
-  provider?: string;
+  provider?: ProviderEnumType;
 }) => {
   const account = await AccountModel.findOne({ provider, providerId: email });
   if (!account) {

@@ -16,11 +16,15 @@ import {
   getWorkspaceByIdService,
   getWorkspaceMembersService,
   updateWorkspaceByIdService,
+  getWorkspaceRolesService,
+  updateRolePermissionsService,
 } from "../services/workspace.service";
 import { getMemberRoleInWorkspace } from "../services/member.service";
+import { z } from "zod";
 import { Permissions } from "../enums/role.enum";
 import { roleGuard } from "../utils/roleGuard";
 import { updateWorkspaceSchema } from "../validation/workspace.validation";
+import { BadRequestException } from "../utils/appError";
 
 export const createWorkspaceController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -165,6 +169,51 @@ export const deleteWorkspaceByIdController = asyncHandler(
     return res.status(HTTPSTATUS.OK).json({
       message: "Workspace deleted successfully",
       currentWorkspace,
+    });
+  }
+);
+
+export const getWorkspaceRolesController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const workspaceId = workspaceIdSchema.parse(req.params.id);
+
+    // Any workspace member can view roles & permissions in the settings panel
+    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.VIEW_ONLY]);
+
+    const { roles } = await getWorkspaceRolesService();
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Roles and permissions fetched successfully",
+      roles,
+    });
+  }
+);
+
+export const updateRolePermissionsController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const userId = req.user?._id;
+    const workspaceId = workspaceIdSchema.parse(req.params.id);
+    const roleId = z.string().parse(req.params.roleId);
+    const permissions = z.array(z.string()).parse(req.body.permissions);
+
+    // Only OWNER can customize/manage RBAC configuration
+    const { role } = await getMemberRoleInWorkspace(userId, workspaceId);
+    roleGuard(role, [Permissions.MANAGE_WORKSPACE_SETTINGS]);
+
+    // Additional safety guard: block modifying OWNER role permissions to avoid lockout
+    const { roles } = await getWorkspaceRolesService();
+    const targetRole = roles.find(r => r._id.toString() === roleId);
+    if (targetRole && targetRole.name === "OWNER") {
+      throw new BadRequestException("Permissions for the OWNER role cannot be modified.");
+    }
+
+    const { role: updatedRole } = await updateRolePermissionsService(roleId, permissions);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Role permissions updated successfully",
+      role: updatedRole,
     });
   }
 );

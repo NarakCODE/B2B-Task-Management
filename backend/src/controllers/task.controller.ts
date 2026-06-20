@@ -61,6 +61,7 @@ export const updateTaskController = asyncHandler(
       workspaceId,
       projectId,
       taskId,
+      userId,
       body
     );
 
@@ -90,6 +91,10 @@ export const getAllTasksController = asyncHandler(
         : undefined,
       keyword: req.query.keyword as string | undefined,
       dueDate: req.query.dueDate as string | undefined,
+      sprint: req.query.sprint as string | undefined,
+      taskType: req.query.taskType
+        ? (req.query.taskType as string)?.split(",")
+        : undefined,
     };
 
     const pagination = {

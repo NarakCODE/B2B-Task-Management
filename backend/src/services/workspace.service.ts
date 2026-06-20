@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Roles } from "../enums/role.enum";
+import { Roles, Permissions } from "../enums/role.enum";
 import MemberModel from "../models/member.model";
 import RoleModel from "../models/roles-permission.model";
 import UserModel from "../models/user.model";
@@ -259,4 +259,31 @@ export const deleteWorkspaceService = async (
     session.endSession();
     throw error;
   }
+};
+
+export const getWorkspaceRolesService = async () => {
+  const roles = await RoleModel.find({});
+  return { roles };
+};
+
+export const updateRolePermissionsService = async (
+  roleId: string,
+  permissions: string[]
+) => {
+  const role = await RoleModel.findById(roleId);
+  if (!role) {
+    throw new NotFoundException("Role not found");
+  }
+
+  // Validate that permissions are valid PermissionType values
+  const validPermissions = Object.values(Permissions);
+  const invalidPermissions = permissions.filter((p) => !validPermissions.includes(p as any));
+  if (invalidPermissions.length > 0) {
+    throw new BadRequestException(`Invalid permissions: ${invalidPermissions.join(", ")}`);
+  }
+
+  role.permissions = permissions as any;
+  await role.save();
+
+  return { role };
 };

@@ -15,6 +15,10 @@ const appConfig = () => ({
 
   FRONTEND_ORIGIN: getEnv("FRONTEND_ORIGIN", "localhost"),
   FRONTEND_GOOGLE_CALLBACK_URL: getEnv("FRONTEND_GOOGLE_CALLBACK_URL"),
+
+  STRIPE_SECRET_KEY: getEnv("STRIPE_SECRET_KEY", "sk_test_placeholder"),
+  STRIPE_WEBHOOK_SECRET: getEnv("STRIPE_WEBHOOK_SECRET", "whsec_placeholder"),
+  STRIPE_PRICE_PRO_ID: getEnv("STRIPE_PRICE_PRO_ID", "price_placeholder"),
 });
 
 export const config = appConfig();

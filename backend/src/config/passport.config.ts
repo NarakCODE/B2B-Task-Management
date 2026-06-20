@@ -14,8 +14,8 @@ import {
 passport.use(
   new GoogleStrategy(
     {
-      clientID: config.GOOGLE_CLIENT_ID,
-      clientSecret: config.GOOGLE_CLIENT_SECRET,
+      clientID: config.GOOGLE_CLIENT_ID || "google-client-id-placeholder",
+      clientSecret: config.GOOGLE_CLIENT_SECRET || "google-client-secret-placeholder",
       callbackURL: config.GOOGLE_CALLBACK_URL,
       scope: ["profile", "email"],
       passReqToCallback: true,

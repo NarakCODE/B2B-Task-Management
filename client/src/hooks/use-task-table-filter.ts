@@ -17,6 +17,8 @@ const useTaskTableFilter = () => {
     keyword: parseAsString,
     projectId: parseAsString,
     assigneeId: parseAsString,
+    sprint: parseAsString,
+    taskType: parseAsString,
   });
 };
 

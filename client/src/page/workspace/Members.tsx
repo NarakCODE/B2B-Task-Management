@@ -2,14 +2,15 @@ import { Separator } from "@/components/ui/separator";
 import InviteMember from "@/components/workspace/member/invite-member";
 import AllMembers from "@/components/workspace/member/all-members";
 import WorkspaceHeader from "@/components/workspace/common/workspace-header";
+import PageContainer from "@/components/resuable/page-container";
 
 export default function Members() {
   return (
-    <div className="w-full h-auto pt-2">
+    <PageContainer className="h-auto pt-2">
       <WorkspaceHeader />
       <Separator className="my-4 " />
       <main>
-        <div className="w-full max-w-3xl mx-auto pt-3">
+        <div className="w-full pt-3">
           <div>
             <h2 className="text-lg leading-[30px] font-semibold mb-1">
               Workspace members
@@ -27,6 +28,6 @@ export default function Members() {
           <AllMembers />
         </div>
       </main>
-    </div>
+    </PageContainer>
   );
 }
