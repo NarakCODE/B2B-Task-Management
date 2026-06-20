@@ -1,7 +1,7 @@
-import * as React from "react";
-import { Check, ChevronDown, Loader, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import * as React from "react"
+import { Check, ChevronDown, Loader, Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 
 import {
   DropdownMenu,
@@ -11,51 +11,50 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import useWorkspaceId from "@/hooks/use-workspace-id";
-import useCreateWorkspaceDialog from "@/hooks/use-create-workspace-dialog";
-import { getAllWorkspacesUserIsMemberQueryFn } from "@/lib/api";
+} from "@/components/ui/sidebar"
+import useWorkspaceId from "@/hooks/use-workspace-id"
+import useCreateWorkspaceDialog from "@/hooks/use-create-workspace-dialog"
+import { getAllWorkspacesUserIsMemberQueryFn } from "@/lib/api"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type WorkspaceType = {
-  _id: string;
-  name: string;
-};
+  _id: string
+  name: string
+  logo?: string | null
+}
 
 export function WorkspaceSwitcher() {
-  const navigate = useNavigate();
-  const { isMobile } = useSidebar();
-  const { onOpen } = useCreateWorkspaceDialog();
-  const workspaceId = useWorkspaceId();
+  const navigate = useNavigate()
+  const { isMobile } = useSidebar()
+  const { onOpen } = useCreateWorkspaceDialog()
+  const workspaceId = useWorkspaceId()
 
   const { data, isPending } = useQuery({
     queryKey: ["userWorkspaces"],
     queryFn: getAllWorkspacesUserIsMemberQueryFn,
     staleTime: 1,
     refetchOnMount: true,
-  });
+  })
 
-  const workspaces: WorkspaceType[] = data?.workspaces ?? [];
+  const workspaces: WorkspaceType[] = data?.workspaces ?? []
 
   // Derived state: no useState or setState required.
   const activeWorkspace = React.useMemo(() => {
     if (workspaces.length === 0) {
-      return undefined;
+      return undefined
     }
 
-    return (
-      workspaces.find((workspace) => workspace._id === workspaceId) ??
-      workspaces[0]
-    );
-  }, [workspaceId, workspaces]);
+    return workspaces.find((workspace) => workspace._id === workspaceId) ?? workspaces[0]
+  }, [workspaceId, workspaces])
 
-  const activeWorkspaceId = activeWorkspace?._id;
+  const activeWorkspaceId = activeWorkspace?._id
 
   // Synchronize the route when there is no workspace ID
   // or the current workspace ID is invalid.
@@ -63,17 +62,17 @@ export function WorkspaceSwitcher() {
     if (activeWorkspaceId && activeWorkspaceId !== workspaceId) {
       navigate(`/workspace/${activeWorkspaceId}`, {
         replace: true,
-      });
+      })
     }
-  }, [activeWorkspaceId, workspaceId, navigate]);
+  }, [activeWorkspaceId, workspaceId, navigate])
 
   const onSelect = (workspace: WorkspaceType) => {
     if (workspace._id === workspaceId) {
-      return;
+      return
     }
 
-    navigate(`/workspace/${workspace._id}`);
-  };
+    navigate(`/workspace/${workspace._id}`)
+  }
 
   return (
     <>
@@ -100,25 +99,28 @@ export function WorkspaceSwitcher() {
               >
                 {activeWorkspace ? (
                   <>
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary font-semibold text-sidebar-primary-foreground">
-                      {activeWorkspace.name
-                        .split(" ")[0]
-                        ?.charAt(0)
-                        .toUpperCase()}
-                    </div>
+                    <Avatar className="size-8 rounded-lg border">
+                      {activeWorkspace.logo ? (
+                        <AvatarImage
+                          src={activeWorkspace.logo}
+                          alt={activeWorkspace.name}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="rounded-lg bg-sidebar-primary font-semibold text-sidebar-primary-foreground text-xs">
+                          {activeWorkspace.name.split(" ")[0]?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
 
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {activeWorkspace.name}
-                      </span>
+                      <span className="truncate font-semibold">{activeWorkspace.name}</span>
                       <span className="truncate text-xs">Free</span>
                     </div>
                   </>
                 ) : (
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      No workspace selected
-                    </span>
+                    <span className="truncate font-semibold">No workspace selected</span>
                   </div>
                 )}
 
@@ -149,9 +151,19 @@ export function WorkspaceSwitcher() {
                     onClick={() => onSelect(workspace)}
                     className="cursor-pointer gap-2 p-2"
                   >
-                    <div className="flex size-6 items-center justify-center rounded-sm border">
-                      {workspace.name.split(" ")[0]?.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar className="size-6 rounded-sm border">
+                      {workspace.logo ? (
+                        <AvatarImage
+                          src={workspace.logo}
+                          alt={workspace.name}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="rounded-sm text-[10px] font-semibold">
+                          {workspace.name.split(" ")[0]?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
 
                     <span className="truncate">{workspace.name}</span>
 
@@ -165,22 +177,17 @@ export function WorkspaceSwitcher() {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem
-                className="cursor-pointer gap-2 p-2"
-                onClick={onOpen}
-              >
+              <DropdownMenuItem className="cursor-pointer gap-2 p-2" onClick={onOpen}>
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>
 
-                <div className="font-medium text-muted-foreground">
-                  Add workspace
-                </div>
+                <div className="font-medium text-muted-foreground">Add workspace</div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
     </>
-  );
+  )
 }

@@ -27,6 +27,21 @@ import integrationRoutes from "./routes/integration.route"
 import billingRoutes from "./routes/billing.route"
 import notificationRoutes from "./routes/notification.route"
 import attachmentRoutes from "./routes/attachment.route"
+import workflowRoutes from "./routes/workflow.route"
+import epicRoutes from "./routes/epic.route"
+import pullRequestRoutes from "./routes/pull-request.route"
+import deploymentRoutes from "./routes/deployment.route"
+import releaseRoutes from "./routes/release.route"
+import milestoneRoutes from "./routes/milestone.route"
+import capacityRoutes from "./routes/capacity.route"
+import analyticsRoutes from "./routes/analytics.route"
+import reviewRoutes from "./routes/review.route"
+import dodRoutes from "./routes/dod.route"
+import incidentRoutes from "./routes/incident.route"
+import automationRuleRoutes from "./routes/automation-rule.route"
+import standupRoutes from "./routes/standup.route"
+import auditRoutes from "./routes/audit.route"
+import documentRoutes from "./routes/document.route"
 
 const app = express()
 app.set("trust proxy", 1)
@@ -100,6 +115,21 @@ app.use(`${BASE_PATH}/time-log`, isAuthenticated, timeLogRoutes)
 app.use(`${BASE_PATH}/timeline`, isAuthenticated, timelineRoutes)
 app.use(`${BASE_PATH}/notification`, isAuthenticated, notificationRoutes)
 app.use(`${BASE_PATH}/task`, isAuthenticated, attachmentRoutes)
+app.use(`${BASE_PATH}/workflow`, isAuthenticated, workflowRoutes)
+app.use(`${BASE_PATH}/epic`, isAuthenticated, epicRoutes)
+app.use(`${BASE_PATH}/pull-request`, pullRequestRoutes)
+app.use(`${BASE_PATH}/deployment`, deploymentRoutes)
+app.use(`${BASE_PATH}/release`, isAuthenticated, releaseRoutes)
+app.use(`${BASE_PATH}/milestone`, isAuthenticated, milestoneRoutes)
+app.use(`${BASE_PATH}/capacity`, isAuthenticated, capacityRoutes)
+app.use(`${BASE_PATH}/analytics`, isAuthenticated, analyticsRoutes)
+app.use(`${BASE_PATH}/review`, isAuthenticated, reviewRoutes)
+app.use(`${BASE_PATH}/dod`, isAuthenticated, dodRoutes)
+app.use(`${BASE_PATH}/incident`, isAuthenticated, incidentRoutes)
+app.use(`${BASE_PATH}/automation`, isAuthenticated, automationRuleRoutes)
+app.use(`${BASE_PATH}/standup`, isAuthenticated, standupRoutes)
+app.use(`${BASE_PATH}/audit`, isAuthenticated, auditRoutes)
+app.use(`${BASE_PATH}/document`, isAuthenticated, documentRoutes)
 app.use(`${BASE_PATH}/integration`, integrationRoutes)
 app.use(`${BASE_PATH}/billing`, billingRoutes)
 

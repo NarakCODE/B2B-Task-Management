@@ -40,7 +40,11 @@ export interface TaskDocument extends Document {
   priority: TaskPriorityEnumType
   taskType: TaskTypeEnumType
   storyPoints: number | null
+  sortOrder: number
   sprint: mongoose.Types.ObjectId | null
+  epic: mongoose.Types.ObjectId | null
+  release: mongoose.Types.ObjectId | null
+  milestone: mongoose.Types.ObjectId | null
   assignedTo: mongoose.Types.ObjectId | null
   createdBy: mongoose.Types.ObjectId
   dueDate: Date | null
@@ -144,9 +148,28 @@ const taskSchema = new Schema<TaskDocument>(
       type: Number,
       default: null,
     },
+    sortOrder: {
+      type: Number,
+      default: 0,
+    },
     sprint: {
       type: Schema.Types.ObjectId,
       ref: "Sprint",
+      default: null,
+    },
+    epic: {
+      type: Schema.Types.ObjectId,
+      ref: "Epic",
+      default: null,
+    },
+    release: {
+      type: Schema.Types.ObjectId,
+      ref: "Release",
+      default: null,
+    },
+    milestone: {
+      type: Schema.Types.ObjectId,
+      ref: "Milestone",
       default: null,
     },
     assignedTo: {
@@ -180,6 +203,12 @@ const taskSchema = new Schema<TaskDocument>(
     timestamps: true,
   },
 )
+
+taskSchema.index({ workspace: 1, sortOrder: 1 })
+taskSchema.index({ workspace: 1, sprint: 1, sortOrder: 1 })
+taskSchema.index({ workspace: 1, epic: 1 })
+taskSchema.index({ workspace: 1, release: 1 })
+taskSchema.index({ workspace: 1, milestone: 1 })
 
 const TaskModel = mongoose.model<TaskDocument>("Task", taskSchema)
 

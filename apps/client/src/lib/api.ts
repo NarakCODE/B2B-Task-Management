@@ -27,7 +27,11 @@ import {
   LogTimePayloadType,
   TaskType,
   ActivityLogType,
+  CreateDocumentPayloadType,
+  DocumentCategoryType,
   NotificationType,
+  WorkspaceDocumentType,
+  WorkspaceDocumentsResponseType,
 } from "../types/api.type"
 import {
   AllWorkspaceResponseType,
@@ -79,6 +83,21 @@ export const createWorkspaceMutationFn = async (
 
 export const editWorkspaceMutationFn = async ({ workspaceId, data }: EditWorkspaceType) => {
   const response = await API.put(`/workspace/update/${workspaceId}`, data)
+  return response.data
+}
+
+export const uploadWorkspaceLogoMutationFn = async ({
+  workspaceId,
+  logoFile,
+}: {
+  workspaceId: string
+  logoFile: File
+}) => {
+  const formData = new FormData()
+  formData.append("logo", logoFile)
+  const response = await API.put(`/workspace/${workspaceId}/logo`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
   return response.data
 }
 
@@ -759,5 +778,55 @@ export const deleteTaskDependencyMutationFn = async ({
   const response = await API.delete(
     `/task/${taskId}/workspace/${workspaceId}/dependency/${dependencyTaskId}/type/${type}`,
   )
+  return response.data
+}
+
+// ==========================================
+// WORKSPACE DOCUMENT API FUNCTIONS
+// ==========================================
+
+export const getWorkspaceDocumentsQueryFn = async ({
+  workspaceId,
+  keyword,
+  category,
+}: {
+  workspaceId: string
+  keyword?: string
+  category?: DocumentCategoryType | "ALL"
+}): Promise<WorkspaceDocumentsResponseType> => {
+  const queryParams = new URLSearchParams()
+  if (keyword) queryParams.append("keyword", keyword)
+  if (category && category !== "ALL") queryParams.append("category", category)
+
+  const query = queryParams.toString()
+  const response = await API.get(`/document/workspace/${workspaceId}${query ? `?${query}` : ""}`)
+  return response.data
+}
+
+export const createDocumentMutationFn = async ({
+  workspaceId,
+  file,
+  data,
+}: CreateDocumentPayloadType): Promise<{ message: string; document: WorkspaceDocumentType }> => {
+  const formData = new FormData()
+  formData.append("file", file)
+  if (data.title) formData.append("title", data.title)
+  if (data.description) formData.append("description", data.description)
+  if (data.category) formData.append("category", data.category)
+
+  const response = await API.post(`/document/workspace/${workspaceId}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  })
+  return response.data
+}
+
+export const deleteDocumentMutationFn = async ({
+  workspaceId,
+  documentId,
+}: {
+  workspaceId: string
+  documentId: string
+}): Promise<{ message: string }> => {
+  const response = await API.delete(`/document/${documentId}/workspace/${workspaceId}`)
   return response.data
 }
