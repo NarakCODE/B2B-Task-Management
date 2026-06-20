@@ -14,7 +14,8 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/reui/badge"
+import { Badge } from "@/components/ui/badge"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -25,11 +26,13 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
   addTaskDependencyMutationFn,
   deleteTaskDependencyMutationFn,
@@ -48,6 +51,8 @@ const DEPENDENCY_LABELS: Record<DependencyType, string> = {
   CHILD: "Child Of",
 }
 
+// Note: text-orange-500, text-blue-500, text-violet-500 are intentional design choices
+// for dependency type distinction; no direct semantic token equivalents exist in radix-nova.
 const DEPENDENCY_ICONS: Record<DependencyType, React.ReactNode> = {
   BLOCKED_BY: <ShieldAlert className="size-3.5 text-destructive" />,
   BLOCKS: <AlertCircle className="size-3.5 text-orange-500" />,
@@ -57,9 +62,9 @@ const DEPENDENCY_ICONS: Record<DependencyType, React.ReactNode> = {
 }
 
 const DEPENDENCY_BADGE_VARIANTS: Record<DependencyType, string> = {
-  BLOCKED_BY: "destructive-light",
-  BLOCKS: "warning-light",
-  RELATED: "primary-light",
+  BLOCKED_BY: "destructive",
+  BLOCKS: "secondary",
+  RELATED: "default",
   PARENT: "outline",
   CHILD: "outline",
 }
@@ -67,9 +72,9 @@ const DEPENDENCY_BADGE_VARIANTS: Record<DependencyType, string> = {
 const STATUS_BADGE: Record<string, string> = {
   BACKLOG: "outline",
   TODO: "default",
-  IN_PROGRESS: "primary-light",
-  IN_REVIEW: "warning-light",
-  DONE: "success-light",
+  IN_PROGRESS: "default",
+  IN_REVIEW: "secondary",
+  DONE: "outline",
 }
 
 interface Props {
@@ -165,7 +170,7 @@ export default function TaskDependencies({ task, workspaceId }: Props) {
   )
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold flex items-center gap-2">
           <Link2 className="size-4" />
@@ -177,24 +182,28 @@ export default function TaskDependencies({ task, workspaceId }: Props) {
           className="gap-1.5"
           onClick={() => setShowAddDialog(true)}
         >
-          <Plus className="size-3.5" />
+          <Plus data-icon="inline-start" />
           Link Task
         </Button>
       </div>
 
       {dependencies.length === 0 && (
-        <div className="text-center py-6 border-2 border-dashed rounded-lg">
-          <Layers className="size-8 mx-auto mb-2 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground">No task dependencies linked yet</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">
-            Link tasks to establish Blocker, Parent/Child, or Related relationships
-          </p>
-        </div>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Layers />
+            </EmptyMedia>
+            <EmptyTitle>No dependencies linked</EmptyTitle>
+            <EmptyDescription>
+              Link tasks to establish Blocker, Parent/Child, or Related relationships
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
 
       {/* Grouped dependency list */}
       {(Object.keys(grouped) as DependencyType[]).map((type) => (
-        <div key={type} className="space-y-1.5">
+        <div key={type} className="flex flex-col gap-1.5">
           <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
             {DEPENDENCY_ICONS[type]}
             {DEPENDENCY_LABELS[type]}
@@ -213,22 +222,18 @@ export default function TaskDependencies({ task, workspaceId }: Props) {
                     DEPENDENCY_BADGE_VARIANTS[type] as
                       | "outline"
                       | "default"
-                      | "destructive-light"
-                      | "warning-light"
-                      | "primary-light"
-                      | "success-light"
+                      | "destructive"
+                      | "secondary"
                   }
-                  className="text-[10px] shrink-0"
+                  className="shrink-0"
                 >
                   {type.replace("_", " ")}
                 </Badge>
 
-                <button
-                  className="flex-1 text-left min-w-0"
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-start min-w-0 h-auto p-0"
                   onClick={() => {
-                    // Navigate to the linked task — we need the projectId from the task
-                    // Since the dependency task only has _id, title, taskCode, status, priority,
-                    // we can open the task in the same project context (best-effort)
                     navigate(
                       `/workspace/${currentWorkspaceId}/project/${task.project?._id || ""}/task/${dep.task._id}`,
                     )
@@ -239,38 +244,26 @@ export default function TaskDependencies({ task, workspaceId }: Props) {
                       {dep.task.taskCode}
                     </span>
                     <span className="text-sm truncate hover:underline">{dep.task.title}</span>
-                    <ChevronRight className="size-3 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ChevronRight className="text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                </button>
+                </Button>
 
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge
-                    variant={
-                      STATUS_BADGE[dep.task.status] as
-                        | "outline"
-                        | "default"
-                        | "destructive-light"
-                        | "warning-light"
-                        | "primary-light"
-                        | "success-light"
-                    }
-                    className="text-[10px] capitalize"
+                    variant={STATUS_BADGE[dep.task.status] as "outline" | "default" | "secondary"}
+                    className="capitalize"
                   >
                     {dep.task.status.replace("_", " ").toLowerCase()}
                   </Badge>
 
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="size-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                    size="icon-xs"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
                     disabled={isRemoving}
                     onClick={() => handleRemoveDependency(dep)}
                   >
-                    {isRemoving ? (
-                      <Loader className="size-3 animate-spin" />
-                    ) : (
-                      <X className="size-3" />
-                    )}
+                    {isRemoving ? <Loader className="animate-spin" /> : <X />}
                   </Button>
                 </div>
               </div>
@@ -281,89 +274,85 @@ export default function TaskDependencies({ task, workspaceId }: Props) {
 
       {/* Add Dependency Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Link a Task</DialogTitle>
+            <DialogDescription>
+              Choose a relationship type and search for a task to link. Blocked By prevents this
+              task from starting, Parent/Child creates a hierarchy, and Related is a loose
+              association.
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Relationship Type
-              </label>
-              <Select
-                value={selectedType}
-                onValueChange={(v) => setSelectedType(v as DependencyType)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(DEPENDENCY_LABELS) as [DependencyType, string][]).map(
-                    ([type, label]) => (
-                      <SelectItem key={type} value={type}>
-                        <div className="flex items-center gap-2">
-                          {DEPENDENCY_ICONS[type]}
-                          {label}
-                        </div>
-                      </SelectItem>
-                    ),
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-                Search Tasks
-              </label>
-              <Input
-                placeholder="Search by title or code…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="mb-2"
-              />
-
-              <div className="max-h-60 overflow-y-auto space-y-1 border rounded-md p-1">
-                {isSearching && (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader className="size-4 animate-spin text-muted-foreground" />
-                  </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="dep-type" className="text-xs font-medium text-muted-foreground">
+              Relationship Type
+            </Label>
+            <Select
+              value={selectedType}
+              onValueChange={(v) => setSelectedType(v as DependencyType)}
+            >
+              <SelectTrigger id="dep-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(DEPENDENCY_LABELS) as [DependencyType, string][]).map(
+                  ([type, label]) => (
+                    <SelectItem key={type} value={type}>
+                      <div className="flex items-center gap-2">
+                        {DEPENDENCY_ICONS[type]}
+                        {label}
+                      </div>
+                    </SelectItem>
+                  ),
                 )}
+              </SelectContent>
+            </Select>
+          </div>
 
-                {!isSearching && availableTasks.length === 0 && (
-                  <p className="text-sm text-center text-muted-foreground py-4">No tasks found</p>
-                )}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="dep-search" className="text-xs font-medium text-muted-foreground">
+              Search Tasks
+            </Label>
+            <Input
+              id="dep-search"
+              placeholder="Search by title or code…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
 
-                {availableTasks.map((t) => (
-                  <button
-                    key={t._id}
-                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-accent text-left transition-colors"
-                    disabled={addMutation.isPending}
-                    onClick={() => handleAddDependency(t._id)}
+            <div className="max-h-60 overflow-y-auto flex flex-col gap-0.5 border rounded-md p-1">
+              {isSearching && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader className="size-4 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
+              {!isSearching && availableTasks.length === 0 && (
+                <p className="text-sm text-center text-muted-foreground py-4">No tasks found</p>
+              )}
+
+              {availableTasks.map((t) => (
+                <Button
+                  key={t._id}
+                  variant="ghost"
+                  className="w-full justify-start gap-2"
+                  disabled={addMutation.isPending}
+                  onClick={() => handleAddDependency(t._id)}
+                >
+                  <span className="text-xs font-mono text-muted-foreground shrink-0">
+                    {t.taskCode}
+                  </span>
+                  <span className="text-sm flex-1 truncate text-left">{t.title}</span>
+                  <Badge
+                    variant={STATUS_BADGE[t.status] as "outline" | "default" | "secondary"}
+                    className="capitalize shrink-0"
                   >
-                    <span className="text-xs font-mono text-muted-foreground shrink-0">
-                      {t.taskCode}
-                    </span>
-                    <span className="text-sm flex-1 truncate">{t.title}</span>
-                    <Badge
-                      variant={
-                        STATUS_BADGE[t.status] as
-                          | "outline"
-                          | "default"
-                          | "destructive-light"
-                          | "warning-light"
-                          | "primary-light"
-                          | "success-light"
-                      }
-                      className="text-[10px] capitalize shrink-0"
-                    >
-                      {t.status.replace("_", " ").toLowerCase()}
-                    </Badge>
-                    {addMutation.isPending && <Loader className="size-3 animate-spin shrink-0" />}
-                  </button>
-                ))}
-              </div>
+                    {t.status.replace("_", " ").toLowerCase()}
+                  </Badge>
+                  {addMutation.isPending && <Loader className="animate-spin" />}
+                </Button>
+              ))}
             </div>
           </div>
 

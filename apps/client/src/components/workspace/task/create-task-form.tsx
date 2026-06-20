@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { format } from "date-fns";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { CalendarIcon, Loader } from "lucide-react";
+import { z } from "zod"
+import { format } from "date-fns"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { CalendarIcon, Loader } from "lucide-react"
 import {
   Form,
   FormControl,
@@ -10,61 +10,50 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import RichTextEditor from "@/components/editor/rich-text-editor";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  getAvatarColor,
-  getAvatarFallbackText,
-  transformOptions,
-} from "@/lib/helper";
-import useWorkspaceId from "@/hooks/use-workspace-id";
-import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "@/constant";
-import useGetProjectsInWorkspaceQuery from "@/hooks/api/use-get-projects";
-import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members";
-import { useGetProjectSprintsQuery } from "@/hooks/api/use-get-sprints";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createTaskMutationFn } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+} from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import RichTextEditor from "@/components/editor/rich-text-editor"
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import { getAvatarColor, getAvatarFallbackText, transformOptions } from "@/lib/helper"
+import useWorkspaceId from "@/hooks/use-workspace-id"
+import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "@/constant"
+import useGetProjectsInWorkspaceQuery from "@/hooks/api/use-get-projects"
+import useGetWorkspaceMembers from "@/hooks/api/use-get-workspace-members"
+import { useGetProjectSprintsQuery } from "@/hooks/api/use-get-sprints"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { createTaskMutationFn } from "@/lib/api"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
-export default function CreateTaskForm(props: {
-  projectId?: string;
-  onClose: () => void;
-}) {
-  const { projectId, onClose } = props;
+export default function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
+  const { projectId, onClose } = props
 
-  const queryClient = useQueryClient();
-  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient()
+  const workspaceId = useWorkspaceId()
 
   const { mutate, isPending } = useMutation({
     mutationFn: createTaskMutationFn,
-  });
+  })
 
   const { data, isLoading } = useGetProjectsInWorkspaceQuery({
     workspaceId,
     skip: !!projectId,
-  });
+  })
 
-  const { data: memberData } = useGetWorkspaceMembers(workspaceId);
+  const { data: memberData } = useGetWorkspaceMembers(workspaceId)
 
-  const projects = data?.projects || [];
-  const members = memberData?.members || [];
+  const projects = data?.projects || []
+  const members = memberData?.members || []
 
   const projectOptions = projects?.map((project) => ({
     label: (
@@ -74,12 +63,12 @@ export default function CreateTaskForm(props: {
       </div>
     ),
     value: project._id,
-  }));
+  }))
 
   const membersOptions = members?.map((member) => {
-    const name = member.userId?.name || "Unknown";
-    const initials = getAvatarFallbackText(name);
-    const avatarColor = getAvatarColor(name);
+    const name = member.userId?.name || "Unknown"
+    const initials = getAvatarFallbackText(name)
+    const avatarColor = getAvatarColor(name)
     return {
       label: (
         <div className="flex items-center space-x-2">
@@ -91,30 +80,27 @@ export default function CreateTaskForm(props: {
         </div>
       ),
       value: member.userId._id,
-    };
-  });
+    }
+  })
 
   const formSchema = z.object({
     title: z.string().trim().min(1, { message: "Title is required" }),
     description: z.string().trim(),
     projectId: z.string().trim().min(1, { message: "Project is required" }),
-    status: z.enum(
-      Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum],
-      { message: "Status is required" }
-    ),
-    priority: z.enum(
-      Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum],
-      { message: "Priority is required" }
-    ),
+    status: z.enum(Object.values(TaskStatusEnum) as [keyof typeof TaskStatusEnum], {
+      message: "Status is required",
+    }),
+    priority: z.enum(Object.values(TaskPriorityEnum) as [keyof typeof TaskPriorityEnum], {
+      message: "Priority is required",
+    }),
     assignedTo: z.string().trim().min(1, { message: "AssignedTo is required" }),
     dueDate: z.date({ message: "A due date is required." }),
-    taskType: z.enum(
-      Object.values(TaskTypeEnum) as [keyof typeof TaskTypeEnum],
-      { message: "Task type is required" }
-    ),
+    taskType: z.enum(Object.values(TaskTypeEnum) as [keyof typeof TaskTypeEnum], {
+      message: "Task type is required",
+    }),
     storyPoints: z.number().int().min(0).nullable().optional(),
     sprint: z.string().nullable().optional(),
-  });
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -126,27 +112,27 @@ export default function CreateTaskForm(props: {
       storyPoints: null,
       sprint: null,
     },
-  });
+  })
 
-  const selectedProjectId = form.watch("projectId") || projectId;
+  const selectedProjectId = form.watch("projectId") || projectId
 
   const { data: sprintsData } = useGetProjectSprintsQuery({
     workspaceId,
     projectId: selectedProjectId || "",
     enabled: !!selectedProjectId,
-  });
+  })
 
-  const sprints = sprintsData?.sprints || [];
+  const sprints = sprintsData?.sprints || []
 
-  const taskStatusList = Object.values(TaskStatusEnum);
-  const taskPriorityList = Object.values(TaskPriorityEnum);
+  const taskStatusList = Object.values(TaskStatusEnum)
+  const taskPriorityList = Object.values(TaskPriorityEnum)
 
-  const statusOptions = transformOptions(taskStatusList);
-  const priorityOptions = transformOptions(taskPriorityList);
+  const statusOptions = transformOptions(taskStatusList)
+  const priorityOptions = transformOptions(taskPriorityList)
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    if (isPending) return;
-    const sprintValue = values.sprint === "backlog" ? null : values.sprint;
+    if (isPending) return
+    const sprintValue = values.sprint === "backlog" ? null : values.sprint
     const payload = {
       workspaceId,
       projectId: values.projectId,
@@ -155,36 +141,27 @@ export default function CreateTaskForm(props: {
         sprint: sprintValue,
         dueDate: values.dueDate.toISOString(),
       },
-    };
+    }
 
     mutate(payload, {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: ["project-analytics", projectId],
-        });
+        })
         queryClient.invalidateQueries({
           queryKey: ["all-tasks", workspaceId],
-        });
-        toast.success("Task created successfully");
-        onClose();
+        })
+        toast.success("Task created successfully")
+        onClose()
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(error.message)
       },
-    });
-  };
+    })
+  }
 
   return (
     <div>
-      <div className="mb-4 pb-2 border-b">
-        <h1 className="text-xl tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1">
-          Create Task
-        </h1>
-        <p className="text-muted-foreground text-sm leading-tight">
-          Organize and manage tasks, resources, and team collaboration
-        </p>
-      </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="space-y-4 pr-1">
@@ -193,9 +170,7 @@ export default function CreateTaskForm(props: {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Task title
-                  </FormLabel>
+                  <FormLabel>Task title</FormLabel>
                   <FormControl>
                     <Input placeholder="Website Redesign" {...field} />
                   </FormControl>
@@ -232,10 +207,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Project</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a project" />
@@ -273,10 +245,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue
@@ -308,10 +277,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Priority</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a priority" />
@@ -342,10 +308,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Task Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a task type" />
@@ -353,11 +316,7 @@ export default function CreateTaskForm(props: {
                       </FormControl>
                       <SelectContent>
                         {Object.values(TaskTypeEnum).map((type) => (
-                          <SelectItem
-                            className="!capitalize"
-                            key={type}
-                            value={type}
-                          >
+                          <SelectItem className="!capitalize" key={type} value={type}>
                             {type.toLowerCase()}
                           </SelectItem>
                         ))}
@@ -380,8 +339,8 @@ export default function CreateTaskForm(props: {
                         placeholder="e.g. 5, 8"
                         value={field.value === null ? "" : field.value}
                         onChange={(e) => {
-                          const val = e.target.value;
-                          field.onChange(val === "" ? null : parseInt(val));
+                          const val = e.target.value
+                          field.onChange(val === "" ? null : parseInt(val))
                         }}
                       />
                     </FormControl>
@@ -398,10 +357,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Assigned To</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a assignee" />
@@ -439,14 +395,10 @@ export default function CreateTaskForm(props: {
                             variant={"outline"}
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
+                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
@@ -478,10 +430,7 @@ export default function CreateTaskForm(props: {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Sprint</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || undefined}
-                    >
+                    <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a sprint" />
@@ -503,16 +452,12 @@ export default function CreateTaskForm(props: {
             )}
           </div>
 
-          <Button
-            className="shrink-0 mt-4 h-10"
-            type="submit"
-            disabled={isPending}
-          >
+          <Button type="submit" className="mt-4" disabled={isPending}>
             {isPending && <Loader className="animate-spin" />}
             Create
           </Button>
         </form>
       </Form>
     </div>
-  );
+  )
 }
