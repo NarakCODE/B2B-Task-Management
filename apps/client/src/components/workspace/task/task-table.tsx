@@ -102,7 +102,7 @@ const TaskTable = () => {
   );
 };
 
-const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
+export const DataTableFilterToolbar: FC<DataTableFilterToolbarProps> = ({
   isLoading,
   projectId,
   filters,
