@@ -6,6 +6,7 @@ import SprintModel from "../models/sprint.model"
 import UserModel from "../models/user.model"
 import { logActivity } from "./activity-log.service"
 import { createNotificationService } from "./notification.service"
+import { validateTaskStatusService } from "./workflow.service"
 import { BadRequestException, NotFoundException } from "../utils/appError"
 
 export const createTaskService = async (
@@ -59,11 +60,15 @@ export const createTaskService = async (
     }
   }
 
+  const validStatus = status
+    ? await validateTaskStatusService(workspaceId, projectId, status)
+    : TaskStatusEnum.TODO
+
   const task = new TaskModel({
     title,
     description,
     priority: priority || TaskPriorityEnum.MEDIUM,
-    status: status || TaskStatusEnum.TODO,
+    status: validStatus,
     taskType: taskType || TaskTypeEnum.FEATURE,
     storyPoints: storyPoints !== undefined ? storyPoints : null,
     sprint: sprint || null,
@@ -179,6 +184,10 @@ export const updateTaskService = async (
     })
   }
 
+  if (body.status) {
+    body.status = await validateTaskStatusService(workspaceId, projectId, body.status)
+  }
+
   // Log activity if status or priority changed
   if (body.status && body.status !== task.status) {
     await logActivity({
@@ -232,6 +241,7 @@ export const getAllTasksService = async (
     dueDate?: string
     sprint?: string
     taskType?: string[]
+    epic?: string
   },
   pagination: {
     pageSize: number
@@ -278,6 +288,10 @@ export const getAllTasksService = async (
 
   if (filters.taskType && filters.taskType.length > 0) {
     query.taskType = { $in: filters.taskType }
+  }
+
+  if (filters.epic) {
+    query.epic = filters.epic
   }
 
   //Pagination Setup
@@ -477,6 +491,70 @@ export const addTaskDependencyService = async (
     .populate("dependencies.task", "_id title taskCode status priority")
 
   return { task: populatedTask }
+}
+
+export const reorderTasksService = async (
+  workspaceId: string,
+  tasks: Array<{ taskId: string; sortOrder: number }>,
+) => {
+  const operations = tasks.map(({ taskId, sortOrder }) => ({
+    updateOne: {
+      filter: { _id: taskId, workspace: workspaceId },
+      update: { $set: { sortOrder } },
+    },
+  }))
+
+  await TaskModel.bulkWrite(operations)
+  return
+}
+
+export const getBacklogTasksService = async (
+  workspaceId: string,
+  filters: {
+    projectId?: string
+    status?: string[]
+    priority?: string[]
+    assignedTo?: string[]
+    keyword?: string
+    taskType?: string[]
+  },
+  pagination: {
+    pageSize: number
+    pageNumber: number
+  },
+) => {
+  const query: Record<string, any> = {
+    workspace: workspaceId,
+    sprint: null,
+  }
+
+  if (filters.projectId) query.project = filters.projectId
+  if (filters.status && filters.status?.length > 0) query.status = { $in: filters.status }
+  if (filters.priority && filters.priority?.length > 0) query.priority = { $in: filters.priority }
+  if (filters.assignedTo && filters.assignedTo?.length > 0)
+    query.assignedTo = { $in: filters.assignedTo }
+  if (filters.keyword) query.title = { $regex: filters.keyword, $options: "i" }
+  if (filters.taskType && filters.taskType.length > 0) query.taskType = { $in: filters.taskType }
+
+  const { pageSize, pageNumber } = pagination
+  const skip = (pageNumber - 1) * pageSize
+
+  const [tasks, totalCount] = await Promise.all([
+    TaskModel.find(query)
+      .skip(skip)
+      .limit(pageSize)
+      .sort({ sortOrder: 1, createdAt: -1 })
+      .populate("assignedTo", "_id name profilePicture -password")
+      .populate("project", "_id emoji name"),
+    TaskModel.countDocuments(query),
+  ])
+
+  const totalPages = Math.ceil(totalCount / pageSize)
+
+  return {
+    tasks,
+    pagination: { pageSize, pageNumber, totalCount, totalPages, skip },
+  }
 }
 
 export const deleteTaskDependencyService = async (

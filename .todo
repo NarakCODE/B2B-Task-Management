@@ -1,0 +1,156 @@
+# B2B Engineering Team Management TODO
+
+## Phase 1 - Delivery Workflow Foundation
+
+- [ ] Add custom workflow states
+  - Backend: create `apps/backend/src/models/workflow.model.ts`
+  - Backend: create workflow routes/controllers/services under `/workflow`
+  - Scope states by `workspace` and optional `project`
+  - Support ordered states, category (`BACKLOG`, `TODO`, `IN_PROGRESS`, `REVIEW`, `DONE`), color, and `isDefault`
+  - Update task validation so status must match the workspace/project workflow
+  - Migration/seed: create default workflow from current task statuses
+
+- [ ] Add backlog ordering
+  - Backend: add `rank` or `sortOrder` to `TaskModel`
+  - API: reorder tasks within workspace/project/sprint
+  - API: list backlog tasks where `sprint: null`
+  - Rules: preserve order when moving tasks into and out of sprints
+
+- [ ] Add epics
+  - Backend: create `EpicModel` with `name`, `description`, `status`, `project`, `workspace`, `owner`, `startDate`, `targetDate`
+  - Backend: add optional `epic` reference to `TaskModel`
+  - API: CRUD epics, list epic tasks, epic progress analytics
+  - UI follow-up: epic detail view and epic filter in task list
+
+## Phase 2 - GitHub-Centered Engineering Flow
+
+- [ ] Link GitHub commits and pull requests to tasks
+  - Backend: extend `IntegrationModel` or add `RepositoryIntegrationModel`
+  - Backend: add `PullRequestModel` with PR number, title, URL, branch, author, status, mergedAt, task references
+  - Webhook: parse task codes from branch names, PR titles, commit messages, and descriptions
+  - API: list PRs linked to a task/project
+  - Notifications: notify assignee when PR opens, review requested, merged, or CI fails
+
+- [ ] Add branch and task automation
+  - API: generate branch names from task code and title, e.g. `feature/TSK-123-add-billing-filter`
+  - Automation: move task to review when PR opens
+  - Automation: move task to done when PR merges, if configured
+  - Safety: require workspace-level settings before auto-closing tasks
+
+- [ ] Add deployment tracking
+  - Backend: create `DeploymentModel` with provider, environment, status, commitSha, release, startedAt, completedAt
+  - Webhook: support deploy success/failure events
+  - API: show deployments by project, release, and linked task
+
+## Phase 3 - Planning, Releases, and Capacity
+
+- [ ] Add releases
+  - Backend: create `ReleaseModel` with version, name, status, targetDate, releasedAt, project, workspace
+  - Backend: add optional `release` reference to `TaskModel`
+  - API: CRUD releases, assign tasks, generate release notes from completed tasks
+  - Analytics: release completion, blockers, overdue tasks
+
+- [ ] Add milestones
+  - Backend: create `MilestoneModel` with name, description, dueDate, project, workspace, status
+  - Backend: link tasks and epics to milestones
+  - API: milestone progress and overdue risk
+
+- [ ] Add team capacity planning
+  - Backend: create `CapacityModel` per sprint/member with availableHours and plannedStoryPoints
+  - Analytics: planned vs completed story points, logged hours, over-allocation
+  - Rules: warn when assigned work exceeds member capacity
+
+## Phase 4 - Engineering Metrics
+
+- [ ] Add cycle-time tracking
+  - Backend: use `ActivityLogModel` status-change events as source data
+  - Analytics: lead time, cycle time, time in review, blocked time, reopened count
+  - API: workspace, project, sprint, task, and assignee metrics
+
+- [ ] Add sprint health metrics
+  - Analytics: velocity, carryover tasks, scope added after sprint start, completion ratio
+  - API: sprint burndown data using story points and status history
+  - API: compare current sprint against historical average velocity
+
+- [ ] Add engineering dashboard endpoints
+  - API: `GET /analytics/workspace/:workspaceId/engineering`
+  - API: `GET /analytics/project/:projectId/workspace/:workspaceId/engineering`
+  - Include: throughput, blocked items, overdue review, active PRs, deployment health
+
+## Phase 5 - Quality, Review, and Incident Management
+
+- [ ] Add task review approvals
+  - Backend: create `TaskReviewModel` or embed reviews on tasks
+  - Fields: reviewers, status, requiredApprovals, approvedBy, rejectedBy, comments
+  - Rules: optionally block moving tasks to done until approvals pass
+
+- [ ] Add Definition of Done checklists
+  - Backend: add reusable checklist templates per workspace/project/task type
+  - Backend: attach checklist items to tasks
+  - Rules: enforce required checklist items before done
+
+- [ ] Add incident and bug triage
+  - Backend: create `IncidentModel` with severity, environment, impact, rootCause, status, owner
+  - Backend: create bug-specific fields on tasks or a separate `BugReportModel`
+  - API: link incidents to tasks, releases, and postmortems
+  - Notifications: alert workspace owners/admins on critical incidents
+
+## Phase 6 - B2B Governance and Customer Commitments
+
+- [ ] Add customer/account impact fields
+  - Backend: create `CustomerAccountModel` or integrate with CRM later
+  - Backend: link tasks/incidents to affected accounts
+  - Fields: account tier, SLA due date, escalation owner, customer priority
+
+- [ ] Add project-level roles
+  - Backend: extend RBAC from workspace-level to optional project-level overrides
+  - API: manage project members, guests, and read-only stakeholders
+  - Audit: log permission and role changes
+
+- [ ] Add audit export
+  - API: export workspace activity logs as CSV/JSON
+  - Filters: user, project, task, action type, date range
+  - Security: restrict to owners/admins
+
+## Phase 7 - Automation and Collaboration
+
+- [ ] Add automation rules
+  - Backend: create `AutomationRuleModel`
+  - Triggers: task created, status changed, PR opened, PR merged, due date missed, incident severity changed
+  - Actions: assign user, change status, notify Slack, create comment, set priority
+  - Safety: validate permissions and prevent recursive loops
+
+- [ ] Add async standups
+  - Backend: create `StandupModel` and `StandupUpdateModel`
+  - Fields: yesterday, today, blockers, linked tasks
+  - API: team daily summary by workspace/project
+  - Notifications: remind members with missing updates
+
+- [ ] Add Slack command support
+  - Integration: `/teamsync task TSK-123`
+  - Integration: `/teamsync standup`
+  - Integration: notify channels for blocker, release, and incident events
+
+## Cross-Cutting Backend Tasks
+
+- [ ] Add pagination and filtering consistently to new list endpoints
+- [ ] Add role/permission guards to all new protected routes
+- [ ] Add workspace ownership checks before reading or mutating records
+- [ ] Add activity logs for create/update/delete and state transitions
+- [ ] Add notifications for assignee, reviewer, owner, and admin-relevant events
+- [ ] Add indexes for `workspace`, `project`, `task`, `sprint`, `status`, and date fields
+- [ ] Update `.env.example` when adding integration secrets or webhook URLs
+- [ ] Update API docs or README after each feature slice
+
+## Suggested Implementation Order
+
+1. Custom workflow states
+2. Backlog ordering
+3. Epics
+4. GitHub PR linking
+5. Cycle-time and sprint metrics
+6. Releases
+7. Review approvals and Definition of Done
+8. Incidents and customer commitments
+9. Automation rules
+10. Async standups and Slack commands

@@ -1,76 +1,73 @@
-import { ConfirmDialog } from "@/components/resuable/confirm-dialog";
-import PermissionsGuard from "@/components/resuable/permission-guard";
-import { Button } from "@/components/ui/button";
-import { Permissions } from "@/constant";
-import { useAuthContext } from "@/context/auth-provider";
-import useConfirmDialog from "@/hooks/use-confirm-dialog";
-import { toast } from "sonner";
-import useWorkspaceId from "@/hooks/use-workspace-id";
-import { deleteWorkspaceMutationFn } from "@/lib/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { ConfirmDialog } from "@/components/resuable/confirm-dialog"
+import PermissionsGuard from "@/components/resuable/permission-guard"
+import { Button } from "@/components/ui/button"
+import { Permissions } from "@/constant"
+import { useAuthContext } from "@/context/auth-provider"
+import useConfirmDialog from "@/hooks/use-confirm-dialog"
+import { toast } from "sonner"
+import useWorkspaceId from "@/hooks/use-workspace-id"
+import { deleteWorkspaceMutationFn } from "@/lib/api"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const DeleteWorkspaceCard = () => {
-  const { workspace } = useAuthContext();
-  const navigate = useNavigate();
+  const { workspace } = useAuthContext()
+  const navigate = useNavigate()
 
-  const queryClient = useQueryClient();
-  const workspaceId = useWorkspaceId();
+  const queryClient = useQueryClient()
+  const workspaceId = useWorkspaceId()
 
-  const { open, onOpenDialog, onCloseDialog } = useConfirmDialog();
+  const { open, onOpenDialog, onCloseDialog } = useConfirmDialog()
 
   const { mutate, isPending } = useMutation({
     mutationFn: deleteWorkspaceMutationFn,
-  });
+  })
 
   const handleConfirm = () => {
     mutate(workspaceId, {
       onSuccess: (data) => {
         queryClient.invalidateQueries({
           queryKey: ["userWorkspaces"],
-        });
-        navigate(`/workspace/${data.currentWorkspace}`);
-        setTimeout(() => onCloseDialog(), 100);
+        })
+        navigate(`/workspace/${data.currentWorkspace}`)
+        setTimeout(() => onCloseDialog(), 100)
       },
       onError: (error) => {
-      toast.error(error.message);
+        toast.error(error.message)
       },
-    });
-  };
+    })
+  }
   return (
     <>
-      <div className="w-full">
-        <div className="mb-5 border-b">
-          <h1 className="text-lg font-semibold mb-1.5">
-            Delete Workspace
-          </h1>
-        </div>
-
-        <PermissionsGuard
-          showMessage
-          requiredPermission={Permissions.DELETE_WORKSPACE}
-        >
-          <div className="flex flex-col items-start justify-between py-0">
-            <div className="flex-1 mb-2">
-              <p>
-                Deleting a workspace is a permanent action and cannot be undone.
-                Once you delete a workspace, all its associated data, including
-                projects, tasks, and member roles, will be permanently removed.
-                Please proceed with caution and ensure this action is
-                intentional.
+      <Card className="border-destructive/30 bg-destructive/5 dark:bg-destructive/10">
+        <CardHeader>
+          <CardTitle className="text-destructive">Delete Workspace</CardTitle>
+          <CardDescription>
+            Deleting a workspace is a permanent action and cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PermissionsGuard showMessage requiredPermission={Permissions.DELETE_WORKSPACE}>
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground">
+                Once you delete a workspace, all its associated data, including projects, tasks, and
+                member roles, will be permanently removed. Please proceed with caution and ensure
+                this action is intentional.
               </p>
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+                variant="destructive"
+                disabled={isPending}
+                onClick={onOpenDialog}
+              >
+                Delete Workspace
+              </Button>
             </div>
-            <Button
-              size="lg"
-              className="w-full sm:w-auto"
-              variant="destructive"
-              onClick={onOpenDialog}
-            >
-              Delete Workspace
-            </Button>
-          </div>
-        </PermissionsGuard>
-      </div>
+          </PermissionsGuard>
+        </CardContent>
+      </Card>
 
       <ConfirmDialog
         isOpen={open}
@@ -83,7 +80,7 @@ const DeleteWorkspaceCard = () => {
         cancelText="Cancel"
       />
     </>
-  );
-};
+  )
+}
 
-export default DeleteWorkspaceCard;
+export default DeleteWorkspaceCard

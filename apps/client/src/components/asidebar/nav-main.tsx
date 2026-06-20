@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Settings,
@@ -7,17 +7,18 @@ import {
   LayoutDashboard,
   CreditCard,
   Shield,
-} from "lucide-react";
+  Files,
+} from "lucide-react"
 import {
   SidebarGroup,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { Link, useLocation } from "react-router-dom";
-import useWorkspaceId from "@/hooks/use-workspace-id";
-import { useAuthContext } from "@/context/auth-provider";
-import { Permissions } from "@/constant";
+} from "@/components/ui/sidebar"
+import { Link, useLocation } from "react-router-dom"
+import useWorkspaceId from "@/hooks/use-workspace-id"
+import { useAuthContext } from "@/context/auth-provider"
+import { Permissions } from "@/constant"
 
 const PlugIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -35,25 +36,23 @@ const PlugIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M8 2v6" />
     <path d="M12 15v3a4 4 0 0 0 4 4h0" />
   </svg>
-);
+)
 
 type ItemType = {
-  title: string;
-  url: string;
-  icon: React.ComponentType<{ className?: string }>;
-};
+  title: string
+  url: string
+  icon: React.ComponentType<{ className?: string }>
+}
 
 export function NavMain() {
-  const { hasPermission } = useAuthContext();
+  const { hasPermission } = useAuthContext()
 
-  const canManageSettings = hasPermission(
-    Permissions.MANAGE_WORKSPACE_SETTINGS
-  );
+  const canManageSettings = hasPermission(Permissions.MANAGE_WORKSPACE_SETTINGS)
 
-  const workspaceId = useWorkspaceId();
-  const location = useLocation();
+  const workspaceId = useWorkspaceId()
+  const location = useLocation()
 
-  const pathname = location.pathname;
+  const pathname = location.pathname
 
   const items: ItemType[] = [
     {
@@ -65,6 +64,11 @@ export function NavMain() {
       title: "Tasks",
       url: `/workspace/${workspaceId}/tasks`,
       icon: CheckCircle,
+    },
+    {
+      title: "Documents",
+      url: `/workspace/${workspaceId}/documents`,
+      icon: Files,
     },
     {
       title: "Members",
@@ -96,7 +100,7 @@ export function NavMain() {
           },
         ]
       : []),
-  ];
+  ]
   return (
     <SidebarGroup>
       <SidebarMenu>
@@ -112,5 +116,5 @@ export function NavMain() {
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  );
+  )
 }

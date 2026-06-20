@@ -24,6 +24,8 @@ import {
   deleteSubtaskService,
   addTaskDependencyService,
   deleteTaskDependencyService,
+  reorderTasksService,
+  getBacklogTasksService,
 } from "../services/task.service"
 import { HTTPSTATUS } from "../config/http.config"
 
@@ -79,6 +81,7 @@ export const getAllTasksController = asyncHandler(async (req: Request, res: Resp
     dueDate: req.query.dueDate as string | undefined,
     sprint: req.query.sprint as string | undefined,
     taskType: req.query.taskType ? (req.query.taskType as string)?.split(",") : undefined,
+    epic: req.query.epic as string | undefined,
   }
 
   const pagination = {
@@ -224,5 +227,55 @@ export const deleteTaskDependencyController = asyncHandler(async (req: Request, 
   return res.status(HTTPSTATUS.OK).json({
     message: "Dependency link removed successfully",
     task,
+  })
+})
+
+export const reorderTasksController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?._id
+  const workspaceId = workspaceIdSchema.parse(req.params.workspaceId)
+  const { tasks } = z
+    .object({
+      tasks: z.array(
+        z.object({ taskId: z.string().trim().min(1), sortOrder: z.number().int().min(0) }),
+      ),
+    })
+    .parse(req.body)
+
+  const { role } = await getMemberRoleInWorkspace(userId, workspaceId)
+  roleGuard(role, [Permissions.EDIT_TASK])
+
+  await reorderTasksService(workspaceId, tasks)
+
+  return res.status(HTTPSTATUS.OK).json({
+    message: "Tasks reordered successfully",
+  })
+})
+
+export const getBacklogTasksController = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user?._id
+  const workspaceId = workspaceIdSchema.parse(req.params.workspaceId)
+
+  const filters = {
+    projectId: req.query.projectId as string | undefined,
+    status: req.query.status ? (req.query.status as string)?.split(",") : undefined,
+    priority: req.query.priority ? (req.query.priority as string)?.split(",") : undefined,
+    assignedTo: req.query.assignedTo ? (req.query.assignedTo as string)?.split(",") : undefined,
+    keyword: req.query.keyword as string | undefined,
+    taskType: req.query.taskType ? (req.query.taskType as string)?.split(",") : undefined,
+  }
+
+  const pagination = {
+    pageSize: parseInt(req.query.pageSize as string) || 10,
+    pageNumber: parseInt(req.query.pageNumber as string) || 1,
+  }
+
+  const { role } = await getMemberRoleInWorkspace(userId, workspaceId)
+  roleGuard(role, [Permissions.VIEW_ONLY])
+
+  const result = await getBacklogTasksService(workspaceId, filters, pagination)
+
+  return res.status(HTTPSTATUS.OK).json({
+    message: "Backlog tasks fetched successfully",
+    ...result,
   })
 })
