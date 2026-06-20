@@ -29,6 +29,7 @@ import billingRoutes from "./routes/billing.route";
 
 
 const app = express();
+app.set("trust proxy", 1);
 const BASE_PATH = config.BASE_PATH;
 
 app.use(
