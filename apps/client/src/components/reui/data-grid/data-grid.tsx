@@ -9,7 +9,7 @@ interface DataGridContextType<TData> {
   isLoading?: boolean
 }
 
-const DataGridContext = createContext<DataGridContextType<any> | null>(null)
+const DataGridContext = createContext<DataGridContextType<unknown> | null>(null)
 
 export function useDataGrid<TData>() {
   const context = useContext(DataGridContext)
@@ -26,12 +26,7 @@ interface DataGridProps<TData> {
   children: ReactNode
 }
 
-export function DataGrid<TData>({
-  table,
-  recordCount,
-  isLoading,
-  children,
-}: DataGridProps<TData>) {
+export function DataGrid<TData>({ table, recordCount, isLoading, children }: DataGridProps<TData>) {
   return (
     <DataGridContext.Provider value={{ table, recordCount, isLoading }}>
       {children}
