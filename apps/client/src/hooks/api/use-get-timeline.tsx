@@ -3,6 +3,7 @@ import {
   getWorkspaceTimelineQueryFn,
   getProjectTimelineQueryFn,
   getSprintTimelineQueryFn,
+  getTaskTimelineQueryFn,
 } from "@/lib/api";
 
 export const useGetWorkspaceTimelineQuery = ({
@@ -48,5 +49,21 @@ export const useGetSprintTimelineQuery = ({
     queryKey: ["sprint-timeline", workspaceId, sprintId],
     queryFn: () => getSprintTimelineQueryFn({ workspaceId, sprintId }),
     enabled: !!workspaceId && !!sprintId && enabled,
+  });
+};
+
+export const useGetTaskTimelineQuery = ({
+  workspaceId,
+  taskId,
+  enabled = true,
+}: {
+  workspaceId: string;
+  taskId: string;
+  enabled?: boolean;
+}) => {
+  return useQuery({
+    queryKey: ["task-timeline", workspaceId, taskId],
+    queryFn: () => getTaskTimelineQueryFn({ workspaceId, taskId }),
+    enabled: !!workspaceId && !!taskId && enabled,
   });
 };

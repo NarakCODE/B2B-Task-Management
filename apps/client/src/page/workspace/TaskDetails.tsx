@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom"
-import { ArrowLeft, Calendar, User, Code, Layers, Clock, ArrowRight, Loader } from "lucide-react"
+import { ArrowLeft, Calendar, User, Code, Layers, Clock, ArrowRight, Loader, History } from "lucide-react"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/reui/badge"
@@ -16,6 +16,7 @@ import TaskCommentBox from "@/components/workspace/task/task-comment-box"
 import TaskCommentList from "@/components/workspace/task/task-comment-list"
 import TaskTypeBadge from "@/components/workspace/task/common/task-type-badge"
 import TaskSubtasks from "@/components/workspace/task/task-subtasks"
+import TaskTimeline from "@/components/workspace/task/task-timeline"
 
 const priorityStyles: Record<string, string> = {
   HIGH: "destructive-light",
@@ -113,41 +114,49 @@ export default function TaskDetails() {
           <Card>
             <CardContent className="pt-6">
               <h2 className="text-sm font-semibold mb-3">Description</h2>
-              <RichContentViewer
-                content={task.description || ""}
-                className="text-sm"
-              />
+              {task.description ? (
+                <RichContentViewer content={task.description} className="text-sm" />
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No description provided.</p>
+              )}
             </CardContent>
           </Card>
 
-          <Separator />
-
-          {/* Subtasks checklist */}
           <Card>
             <CardContent className="pt-6">
               <TaskSubtasks task={task} workspaceId={workspaceId} />
             </CardContent>
           </Card>
 
-          <Separator />
-
-          <div className="space-y-4">
-            <h2 className="text-sm font-semibold flex items-center gap-2">
-              Comments ({comments.length})
-            </h2>
-            <TaskCommentList comments={comments} workspaceId={workspaceId} />
-            <TaskCommentBox workspaceId={workspaceId} taskId={task._id} />
-          </div>
-        </div>
-
-        <div className="space-y-4">
           <Card>
             <CardContent className="pt-6 space-y-4">
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <User className="size-3" />
-                  Assigned To
-                </p>
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                Comments ({comments.length})
+              </h2>
+              <TaskCommentList comments={comments} workspaceId={workspaceId} />
+              <TaskCommentBox workspaceId={workspaceId} taskId={task._id} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <History className="size-4" />
+                Activity Log
+              </h2>
+              <TaskTimeline taskId={task._id} workspaceId={workspaceId} />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4 md:sticky md:top-6 md:self-start">
+          <Card>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <User className="size-3.5" />
+                  Assignee
+                </span>
                 <div className="flex items-center gap-2">
                   <Avatar className="size-6">
                     <AvatarImage src={task.assignedTo?.profilePicture ?? ""} />
@@ -161,81 +170,79 @@ export default function TaskDetails() {
 
               <Separator />
 
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Layers className="size-3" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Layers className="size-3.5" />
                   Project
-                </p>
-                <p className="text-sm font-medium">
+                </span>
+                <span className="text-sm font-medium">
                   {task.project?.emoji} {task.project?.name || "—"}
-                </p>
+                </span>
               </div>
 
               <Separator />
 
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Code className="size-3" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Code className="size-3.5" />
                   Sprint
-                </p>
-                <p className="text-sm font-medium">
+                </span>
+                <span className="text-sm font-medium">
                   {task.sprint?.name || "Backlog"}
-                </p>
-                {task.sprint && (
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {task.sprint.status.toLowerCase()}
-                  </p>
-                )}
+                </span>
               </div>
 
               <Separator />
 
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Calendar className="size-3" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Calendar className="size-3.5" />
                   Due Date
-                </p>
-                <p className="text-sm font-medium">
+                </span>
+                <span className="text-sm font-medium">
                   {task.dueDate
                     ? format(new Date(task.dueDate), "MMM d, yyyy")
                     : "—"}
-                </p>
+                </span>
               </div>
 
               {task.storyPoints !== null && task.storyPoints !== undefined && (
                 <>
                   <Separator />
-                  <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Story Points</p>
-                    <p className="text-sm font-medium">{task.storyPoints}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Story Points</span>
+                    <span className="text-sm font-medium">{task.storyPoints}</span>
                   </div>
                 </>
               )}
 
               <Separator />
 
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                  <Clock className="size-3" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Clock className="size-3.5" />
                   Created
-                </p>
-                <p className="text-sm">
+                </span>
+                <span className="text-sm">
                   {task.createdAt
                     ? format(new Date(task.createdAt), "MMM d, yyyy")
                     : "—"}
-                </p>
+                </span>
               </div>
 
               {task.updatedAt && (
-                <div className="space-y-1">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <ArrowRight className="size-3" />
-                    Updated
-                  </p>
-                  <p className="text-sm">
-                    {format(new Date(task.updatedAt), "MMM d, yyyy")}
-                  </p>
-                </div>
+                <>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <ArrowRight className="size-3.5" />
+                      Updated
+                    </span>
+                    <span className="text-sm">
+                      {format(new Date(task.updatedAt), "MMM d, yyyy")}
+                    </span>
+                  </div>
+                </>
               )}
             </CardContent>
           </Card>

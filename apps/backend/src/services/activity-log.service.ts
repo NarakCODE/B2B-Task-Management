@@ -97,3 +97,12 @@ export const getSprintTimelineService = async (workspaceId: string, sprintId: st
 
   return { logs };
 };
+
+export const getTaskTimelineService = async (workspaceId: string, taskId: string) => {
+  const logs = await ActivityLogModel.find({ workspace: workspaceId, task: taskId })
+    .sort({ createdAt: -1 })
+    .populate("user", "_id name profilePicture")
+    .limit(100);
+
+  return { logs };
+};

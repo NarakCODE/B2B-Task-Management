@@ -590,6 +590,22 @@ export const getSprintTimelineQueryFn = async ({
   return response.data;
 };
 
+export const getTaskTimelineQueryFn = async ({
+  workspaceId,
+  taskId,
+}: {
+  workspaceId: string;
+  taskId: string;
+}): Promise<{
+  message: string;
+  logs: ActivityLogType[];
+}> => {
+  const response = await API.get(
+    `/timeline/task/${taskId}/workspace/${workspaceId}`
+  );
+  return response.data;
+};
+
 export interface IntegrationType {
   _id: string;
   workspace: string;
