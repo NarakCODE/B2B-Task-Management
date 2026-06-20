@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Row } from "@tanstack/react-table";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,14 +29,17 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceId();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: deleteTaskMutationFn,
-  });
+  const params = useParams();
+  const navigate = useNavigate();
 
   const task = row.original;
   const taskId = task._id as string;
   const taskCode = task.taskCode;
+  const projectId = params.projectId || task.project?._id;
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: deleteTaskMutationFn,
+  });
 
   const handleConfirm = () => {
     mutate(
@@ -55,6 +59,12 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     );
   };
 
+  const handleViewDetails = () => {
+    if (workspaceId && projectId && taskId) {
+      navigate(`/workspace/${workspaceId}/project/${projectId}/task/${taskId}`);
+    }
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -68,6 +78,15 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
+          {/* View Details Option */}
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={handleViewDetails}
+          >
+            <Eye className="size-4" /> Task Details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+
           {/* Edit Task Option */}
           <DropdownMenuItem
             className="cursor-pointer"

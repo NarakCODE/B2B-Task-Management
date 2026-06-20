@@ -79,10 +79,7 @@ export default function EditWorkspaceForm() {
     <div className="w-full h-auto max-w-full">
       <div className="h-full">
         <div className="mb-5 border-b">
-          <h1
-            className="text-[17px] tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1.5
-           text-center sm:text-left"
-          >
+          <h1 className="text-lg font-semibold mb-1.5">
             Edit Workspace
           </h1>
         </div>
@@ -94,13 +91,12 @@ export default function EditWorkspaceForm() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
+                    <FormLabel>
                       Workspace name
                     </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Taco's Co."
-                        className="!h-[48px] disabled:opacity-90 disabled:pointer-events-none"
                         disabled={!canEditWorkspace}
                         {...field}
                       />
@@ -116,7 +112,7 @@ export default function EditWorkspaceForm() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
+                    <FormLabel>
                       Workspace description
                       <span className="text-xs font-extralight ml-2">
                         Optional
@@ -138,7 +134,8 @@ export default function EditWorkspaceForm() {
             </div>
             {canEditWorkspace && (
               <Button
-                className="flex place-self-end  h-[40px] text-white font-semibold"
+                size="lg"
+                className="w-full sm:w-auto"
                 disabled={isPending}
                 type="submit"
               >

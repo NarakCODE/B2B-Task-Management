@@ -18,6 +18,7 @@ export const PROTECTED_ROUTES = {
   ROLES: "/workspace/:workspaceId/roles",
   BILLING: "/workspace/:workspaceId/billing",
   PROJECT_DETAILS: "/workspace/:workspaceId/project/:projectId",
+  TASK_DETAILS: "/workspace/:workspaceId/project/:projectId/task/:taskId",
 };
 
 export const BASE_ROUTE = {

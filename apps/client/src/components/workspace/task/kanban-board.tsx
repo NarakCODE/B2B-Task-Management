@@ -1,7 +1,7 @@
 "use client"
 
 import { ComponentProps, useState, useEffect, useMemo } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/reui/badge"
 import {
@@ -34,7 +34,6 @@ import { UniqueIdentifier } from "@dnd-kit/core"
 import { getAvatarColor, getAvatarFallbackText } from "@/lib/helper"
 
 import { DataTableFilterToolbar } from "./task-table"
-import EditTaskDialog from "./edit-task-dialog"
 
 // Task interface for ReUI Kanban structure
 interface Task {
@@ -74,7 +73,7 @@ function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProp
 
   const cardContent = (
     <Card onClick={onClick} className="cursor-pointer hover:border-primary/40 dark:hover:border-primary/25 transition-all select-none">
-      <CardContent className="space-y-2.5 p-3">
+      <CardContent className="space-y-2 p-3">
         <div className="flex items-start justify-between gap-2">
           <span className="line-clamp-2 text-sm font-medium text-foreground leading-snug">
             {task.title}
@@ -92,7 +91,7 @@ function TaskCard({ task, asHandle, isOverlay, onClick, ...props }: TaskCardProp
             {task.priority}
           </Badge>
         </div>
-        <div className="text-muted-foreground flex items-center justify-between text-xs mt-3">
+        <div className="text-muted-foreground flex items-center justify-between text-xs">
           {task.assignee && (
             <div className="flex items-center gap-1.5">
               <Avatar className="size-4.5">
@@ -138,8 +137,8 @@ function TaskColumn({ value, tasks, isOverlay, onTaskClick, ...props }: TaskColu
   return (
     <KanbanColumn value={value} {...props} className="w-[300px] shrink-0 h-full max-h-[calc(100vh-280px)]">
       <Card className="flex flex-col h-full bg-muted/20 dark:bg-zinc-950/10 border-dashed border-2">
-        <CardHeader className="flex flex-row items-center justify-between p-3 border-b mb-2">
-          <div className="flex items-center gap-2.5">
+        <CardHeader className="flex flex-row items-center justify-between p-3 border-b">
+          <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">
               {COLUMN_TITLES[value]}
             </span>
@@ -153,8 +152,8 @@ function TaskColumn({ value, tasks, isOverlay, onTaskClick, ...props }: TaskColu
             </Button>
           </KanbanColumnHandle>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto p-2">
-          <KanbanColumnContent value={value} className="flex flex-col gap-2.5 min-h-[150px] pb-10">
+        <CardContent className="flex-1 overflow-y-auto p-3">
+          <KanbanColumnContent value={value} className="flex flex-col gap-2 min-h-[150px]">
             {tasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -175,10 +174,9 @@ export default function KanbanBoardView() {
   const param = useParams()
   const projectId = param.projectId as string
   const workspaceId = useWorkspaceId()
+  const navigate = useNavigate()
   const [filters, setFilters] = useTaskTableFilter()
   const queryClient = useQueryClient()
-
-  const [activeTask, setActiveTask] = useState<TaskType | null>(null)
 
   // Fetch tasks
   const { data, isLoading } = useQuery({
@@ -340,7 +338,7 @@ export default function KanbanBoardView() {
   }
 
   return (
-    <div className="flex flex-col space-y-4 w-full">
+    <>
       {/* Filter toolbar */}
       <DataTableFilterToolbar
         isLoading={isLoading}
@@ -355,13 +353,15 @@ export default function KanbanBoardView() {
         onValueChange={handleColumnsChange}
         getItemValue={(item) => item.id}
       >
-        <KanbanBoard className="flex gap-4 overflow-x-auto pb-4 items-start min-h-[calc(100vh-270px)] h-full">
+        <KanbanBoard className="flex gap-4 overflow-x-auto items-start min-h-[calc(100vh-310px)] h-full">
           {Object.entries(localColumns).map(([columnValue, tasks]) => (
             <TaskColumn
               key={columnValue}
               value={columnValue}
               tasks={tasks}
-              onTaskClick={(task) => setActiveTask(task.rawTask)}
+              onTaskClick={(task) =>
+                navigate(`/workspace/${workspaceId}/project/${projectId}/task/${task.rawTask._id}`)
+              }
             />
           ))}
         </KanbanBoard>
@@ -370,15 +370,6 @@ export default function KanbanBoardView() {
           {renderOverlay as any}
         </KanbanOverlay>
       </Kanban>
-
-      {/* Edit Task Dialog */}
-      {activeTask && (
-        <EditTaskDialog
-          task={activeTask}
-          isOpen={!!activeTask}
-          onClose={() => setActiveTask(null)}
-        />
-      )}
-    </div>
+    </>
   )
 }

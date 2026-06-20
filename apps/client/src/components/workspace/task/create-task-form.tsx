@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "../../ui/textarea";
+import RichTextEditor from "@/components/editor/rich-text-editor";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -175,8 +175,8 @@ export default function CreateTaskForm(props: {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 mb-4 pb-2 border-b">
+    <div>
+      <div className="mb-4 pb-2 border-b">
         <h1 className="text-xl tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1">
           Create Task
         </h1>
@@ -186,11 +186,8 @@ export default function CreateTaskForm(props: {
       </div>
 
       <Form {...form}>
-        <form
-          className="flex flex-col flex-1 min-h-0"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 pr-1">
             <FormField
               control={form.control}
               name="title"
@@ -217,7 +214,11 @@ export default function CreateTaskForm(props: {
                     <span className="text-xs font-extralight ml-2">Optional</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea rows={2} placeholder="Description" {...field} />
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Describe the task..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

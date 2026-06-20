@@ -129,7 +129,8 @@ export default function CreateWorkspaceForm({
             />
             <Button
               disabled={isPending}
-              className="w-full h-[40px] text-white font-semibold"
+              className="w-full"
+              size="lg"
               type="submit"
             >
               {isPending && <Loader className="animate-spin" />}

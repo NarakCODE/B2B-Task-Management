@@ -5,6 +5,7 @@ import WorkspaceDashboard from "@/page/workspace/Dashboard";
 import Members from "@/page/workspace/Members";
 import Profile from "@/page/workspace/Profile";
 import ProjectDetails from "@/page/workspace/ProjectDetails";
+import TaskDetails from "@/page/workspace/TaskDetails";
 import Settings from "@/page/workspace/Settings";
 import Integrations from "@/page/workspace/Integrations";
 import Billing from "@/page/workspace/Billing";
@@ -29,6 +30,7 @@ export const protectedRoutePaths = [
   { path: PROTECTED_ROUTES.PROFILE, element: <Profile /> },
   { path: PROTECTED_ROUTES.SETTINGS, element: <Settings /> },
   { path: PROTECTED_ROUTES.PROJECT_DETAILS, element: <ProjectDetails /> },
+  { path: PROTECTED_ROUTES.TASK_DETAILS, element: <TaskDetails /> },
 ];
 
 export const baseRoutePaths = [

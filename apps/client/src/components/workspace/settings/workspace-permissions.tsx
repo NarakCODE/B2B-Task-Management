@@ -170,7 +170,7 @@ const WorkspacePermissions = () => {
   return (
     <div className="w-full space-y-6">
       <div className="border-b pb-4">
-        <h2 className="text-[17px] tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1">
+        <h2 className="text-lg font-semibold mb-1">
           Role-Based Access Control (RBAC)
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -231,7 +231,6 @@ const WorkspacePermissions = () => {
                         size="sm"
                         disabled={!isModified || isSaving}
                         onClick={() => handleReset(role._id)}
-                        className="gap-1.5 h-9"
                       >
                         <RefreshCw className="w-4 h-4" /> Reset
                       </Button>
@@ -239,7 +238,7 @@ const WorkspacePermissions = () => {
                         size="sm"
                         disabled={!isModified || isSaving}
                         onClick={() => handleSave(role._id)}
-                        className="gap-1.5 h-9 font-medium shadow-sm"
+                        className="shadow-sm"
                       >
                         {isSaving ? (
                           <Loader className="w-4 h-4 animate-spin" />

@@ -41,10 +41,7 @@ const DeleteWorkspaceCard = () => {
     <>
       <div className="w-full">
         <div className="mb-5 border-b">
-          <h1
-            className="text-[17px] tracking-[-0.16px] dark:text-[#fcfdffef] font-semibold mb-1.5
-           text-center sm:text-left"
-          >
+          <h1 className="text-lg font-semibold mb-1.5">
             Delete Workspace
           </h1>
         </div>
@@ -64,7 +61,8 @@ const DeleteWorkspaceCard = () => {
               </p>
             </div>
             <Button
-              className="shrink-0 flex place-self-end h-[40px]"
+              size="lg"
+              className="w-full sm:w-auto"
               variant="destructive"
               onClick={onOpenDialog}
             >

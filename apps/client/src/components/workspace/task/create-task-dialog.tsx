@@ -26,7 +26,7 @@ const CreateTaskDialog = (props: { projectId?: string }) => {
             New Task
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-hidden border-0">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto border-0">
           <DialogHeader className="sr-only">
             <DialogTitle>Create Task</DialogTitle>
             <DialogDescription>Add a new task to organize work</DialogDescription>

@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "../../ui/textarea";
+import RichTextEditor from "@/components/editor/rich-text-editor";
 import { Calendar } from "@/components/ui/calendar";
 import useWorkspaceId from "@/hooks/use-workspace-id";
 import { TaskPriorityEnum, TaskStatusEnum, TaskTypeEnum } from "@/constant";
@@ -137,17 +137,14 @@ export default function EditTaskForm({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 mb-4 pb-2 border-b">
+    <div>
+      <div className="mb-4 pb-2 border-b">
         <h1 className="text-xl font-semibold">Edit Task</h1>
       </div>
 
       <Form {...form}>
-        <form
-          className="flex flex-col flex-1 min-h-0"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <div className="space-y-4 pr-1">
             <FormField
               control={form.control}
               name="title"
@@ -172,7 +169,11 @@ export default function EditTaskForm({
                     <span className="text-xs font-extralight ml-2">Optional</span>
                   </FormLabel>
                   <FormControl>
-                    <Textarea {...field} rows={2} placeholder="Description" />
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Describe the task..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -397,7 +398,7 @@ export default function EditTaskForm({
             />
           </div>
 
-          <Button type="submit" className="shrink-0 mt-4 w-full" disabled={isPending}>
+          <Button type="submit" className="mt-4 w-full" disabled={isPending}>
             {isPending && <Loader className="animate-spin" />}
             Save Changes
           </Button>

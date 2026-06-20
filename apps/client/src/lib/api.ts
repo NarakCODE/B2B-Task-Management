@@ -303,6 +303,21 @@ export const deleteTaskMutationFn = async ({
   return response.data;
 };
 
+export const getTaskByIdQueryFn = async ({
+  taskId,
+  projectId,
+  workspaceId,
+}: {
+  taskId: string;
+  projectId: string;
+  workspaceId: string;
+}): Promise<{ message: string; task: TaskType }> => {
+  const response = await API.get(
+    `/task/${taskId}/project/${projectId}/workspace/${workspaceId}`
+  );
+  return response.data;
+};
+
 // ==========================================
 // SPRINTS API FUNCTIONS
 // ==========================================
