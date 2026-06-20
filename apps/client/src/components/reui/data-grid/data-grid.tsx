@@ -9,7 +9,8 @@ interface DataGridContextType<TData> {
   isLoading?: boolean
 }
 
-const DataGridContext = createContext<DataGridContextType<unknown> | null>(null)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const DataGridContext = createContext<DataGridContextType<any> | null>(null)
 
 export function useDataGrid<TData>() {
   const context = useContext(DataGridContext)
